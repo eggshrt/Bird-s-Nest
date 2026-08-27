@@ -1,0 +1,23 @@
+{
+  "name": "skill-orchestrator",
+  "version": "0.1.0+codex.20260827053125",
+  "description": "Align spoken requirements, retrieve local Agent Skills, plan a safe DAG, execute after confirmation, and verify the result.",
+  "author": {
+    "name": "eggshrt"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Skill Orchestrator",
+    "shortDescription": "Align requirements and safely orchestrate local skills.",
+    "longDescription": "Turns a spoken need into a confirmed requirement contract, retrieves and reranks local Agent Skills, presents a dependency-aware execution plan, runs only after a second confirmation, and verifies every output.",
+    "developerName": "eggshrt",
+    "category": "Productivity",
+    "capabilities": [
+      "Requirement alignment",
+      "Local skill retrieval",
+      "DAG planning",
+      "Verified execution"
+    ],
+    "defaultPrompt": "Use $skill-orchestrator to align this request, retrieve the right skills, and propose a safe execution plan."
+  }
+}

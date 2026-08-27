@@ -1,0 +1,20 @@
+{
+  "name": "skill-orchestrator-private",
+  "interface": {
+    "displayName": "Skill Orchestrator Private"
+  },
+  "plugins": [
+    {
+      "name": "skill-orchestrator",
+      "source": {
+        "source": "local",
+        "path": "./plugins/skill-orchestrator"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
