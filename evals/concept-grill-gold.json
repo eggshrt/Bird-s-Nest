@@ -1,0 +1,185 @@
+{
+  "schema_version": "ConceptGrillGoldV1",
+  "cases": [
+    {
+      "id": "character-no-idea",
+      "asset_type": "character_master",
+      "vague_request": "我没想法，你看着做，反正要高级。",
+      "evidence": ["她在混乱中反复把工具按尺寸归位。", "她从不佩戴首饰。"],
+      "conflict": "抽象的高级感可能抹掉行为证据。",
+      "expected_dimensions": ["posture_action_line", "wearing_behavior", "recognition_anchors"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "evidence_first", "reject_cliche"]
+    },
+    {
+      "id": "character-same-name",
+      "asset_type": "character_master",
+      "vague_request": "把两个都叫阿明的人物做一下。",
+      "evidence": ["chr-004 与 chr-011 同名但剧情功能不同。"],
+      "conflict": "请求包含两个稳定资产。",
+      "expected_dimensions": ["stable_asset_id", "dramatic_function"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "stop_multi_asset", "require_selection_gate"]
+    },
+    {
+      "id": "character-cultural-risk",
+      "asset_type": "character_master",
+      "vague_request": "给她多放点少数民族图腾，看起来神秘。",
+      "evidence": ["剧本只明确现代都市成长经历，没有族群或宗教设定。"],
+      "conflict": "无依据文化符号会造成误用。",
+      "expected_dimensions": ["world_culture_basis", "cultural_boundaries", "clothing_layers"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_cultural_misuse", "offer_alternative"]
+    },
+    {
+      "id": "character-production-conflict",
+      "asset_type": "character_master",
+      "vague_request": "每场都换一套完全不同的复杂造型。",
+      "evidence": ["角色跨 18 个连续场景，制作周期只允许一套母版和两组变化。"],
+      "conflict": "造型数量破坏连续性并不可生产。",
+      "expected_dimensions": ["clothing_layers", "states_continuity_invariants", "production_limits"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_production_infeasibility", "delta_only_states"]
+    },
+    {
+      "id": "character-long-context",
+      "asset_type": "character_master",
+      "vague_request": "按整部剧把她从胆怯到决断做出来。",
+      "evidence": ["相关证据散布在第 2、19、44、61 场。"],
+      "conflict": "长剧本中无关角色信息容易污染判断。",
+      "expected_dimensions": ["growth_stage", "motif_memory_point", "derived_states"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "bounded_snapshot", "record_omissions"]
+    },
+    {
+      "id": "location-generic-cool",
+      "asset_type": "location_master",
+      "vague_request": "修理厂要酷、电影感、很赛博。",
+      "evidence": ["这是三代人持续营业的小型修理厂。", "当地频繁涨潮。"],
+      "conflict": "赛博装饰可能覆盖生活与气候逻辑。",
+      "expected_dimensions": ["life_traces", "climate", "institution_regional_culture"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "translate_adjectives", "reject_cliche"]
+    },
+    {
+      "id": "location-same-name",
+      "asset_type": "location_master",
+      "vague_request": "做老宅。",
+      "evidence": ["loc-002 和 loc-019 都以老宅为别名。"],
+      "conflict": "自然语言无法唯一解析。",
+      "expected_dimensions": ["stable_asset_id", "spatial_function"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "show_ambiguity", "require_selection_gate"]
+    },
+    {
+      "id": "location-impossible-scale",
+      "asset_type": "location_master",
+      "vague_request": "小公寓里要有十米挑高和巨大中庭。",
+      "evidence": ["剧情明确它是 38 平方米老公房。"],
+      "conflict": "尺度要求与事实冲突。",
+      "expected_dimensions": ["scale", "architecture", "geography_circulation"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_script_conflict", "offer_alternative"]
+    },
+    {
+      "id": "location-cultural-pastiche",
+      "asset_type": "location_master",
+      "vague_request": "把所有东方建筑元素混在一起。",
+      "evidence": ["故事明确发生在 1990 年代闽南渔村。"],
+      "conflict": "泛化的东方拼贴会抹掉地域结构。",
+      "expected_dimensions": ["architecture", "materials", "institution_regional_culture"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_cultural_misuse", "source_regional_logic"]
+    },
+    {
+      "id": "location-no-people-traces",
+      "asset_type": "location_master",
+      "vague_request": "空间要干净得像建筑摄影。",
+      "evidence": ["五名工人昼夜共用，剧情靠物品错位揭示冲突。"],
+      "conflict": "无痕空间会破坏叙事信息。",
+      "expected_dimensions": ["life_traces", "zones", "light_sources"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "evidence_first", "preserve_story_information"]
+    },
+    {
+      "id": "scene-master-drift",
+      "asset_type": "scene_state",
+      "vague_request": "这一场把修理厂完全改成废墟。",
+      "evidence": ["前后场景均在正常营业，只有台风导致局部进水。"],
+      "conflict": "场景状态越过地点母版连续性。",
+      "expected_dimensions": ["location_master_reference", "spatial_changes", "delta_from_location_master"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_continuity_conflict", "delta_only_states"]
+    },
+    {
+      "id": "scene-vague-tense",
+      "asset_type": "scene_state",
+      "vague_request": "这场要紧张一点。",
+      "evidence": ["观众已知钥匙是假的，角色尚不知情。"],
+      "conflict": "情绪词未指定可观察的注意力结构。",
+      "expected_dimensions": ["attention_hierarchy", "lighting", "dramatic_moment"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "translate_adjectives", "protect_information_design"]
+    },
+    {
+      "id": "scene-weather-conflict",
+      "asset_type": "scene_state",
+      "vague_request": "换成阳光明媚，画面更好看。",
+      "evidence": ["雨声掩盖了人物离开的脚步，是因果节点。"],
+      "conflict": "天气选择会破坏剧情因果。",
+      "expected_dimensions": ["weather", "atmosphere", "environmental_interaction"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_script_conflict", "state_consequence"]
+    },
+    {
+      "id": "scene-too-many-assets",
+      "asset_type": "scene_state",
+      "vague_request": "顺便把场里三个人和钥匙都定了。",
+      "evidence": ["当前选中 scn-012。"],
+      "conflict": "请求越过单资产边界。",
+      "expected_dimensions": ["stable_asset_id", "participants", "attention_hierarchy"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "stop_multi_asset", "keep_participants_context_only"]
+    },
+    {
+      "id": "scene-production-fallback",
+      "asset_type": "scene_state",
+      "vague_request": "我要整栋楼在镜头里实时坍塌。",
+      "evidence": ["戏剧功能仅要求出口被封。", "已确认制作资源无法稳定完成全楼坍塌。"],
+      "conflict": "执行复杂度远超戏剧需求和生产能力。",
+      "expected_dimensions": ["spatial_changes", "attention_hierarchy", "production_limits"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_production_infeasibility", "offer_simpler_fallback"]
+    },
+    {
+      "id": "prop-generic-ancient",
+      "asset_type": "hero_prop",
+      "vague_request": "钥匙要古老神秘、有故事感。",
+      "evidence": ["钥匙由父亲十年前亲手改造，长期接触机油。"],
+      "conflict": "抽象古老感需要落到制造和磨损逻辑。",
+      "expected_dimensions": ["structure", "wear", "cultural_origin"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "translate_adjectives", "use_history_logic"]
+    },
+    {
+      "id": "prop-operation-mismatch",
+      "asset_type": "hero_prop",
+      "vague_request": "做成非常细小精致的钥匙。",
+      "evidence": ["角色戴厚手套在暴雨中单手操作。"],
+      "conflict": "精细尺度与操作方式冲突。",
+      "expected_dimensions": ["operation", "scale", "weight"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_production_infeasibility", "ergonomic_reasoning"]
+    },
+    {
+      "id": "prop-cultural-symbol",
+      "asset_type": "hero_prop",
+      "vague_request": "刻一个神秘宗教符号就会更有记忆点。",
+      "evidence": ["剧本没有宗教归属；道具由地方机械厂生产。"],
+      "conflict": "符号无来源且可能构成文化误用。",
+      "expected_dimensions": ["cultural_origin", "recognition_point", "materials"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_cultural_misuse", "offer_manufacturing_anchor"]
+    },
+    {
+      "id": "prop-state-overreach",
+      "asset_type": "hero_prop",
+      "vague_request": "完整、弯曲、断裂三版都各自重新设计。",
+      "evidence": ["三种状态属于同一 prp-001，断裂位置承担线索。"],
+      "conflict": "衍生状态不能成为新的独立资产。",
+      "expected_dimensions": ["damage_change_states", "invariants", "recognition_point"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "delta_only_states", "preserve_asset_id"]
+    },
+    {
+      "id": "prop-owner-conflict",
+      "asset_type": "hero_prop",
+      "vague_request": "把钥匙做得像反派的武器。",
+      "evidence": ["钥匙由主人公继承，核心功能是开门和确认亲缘。"],
+      "conflict": "武器母题会错置所有权与戏剧用途。",
+      "expected_dimensions": ["owner", "dramatic_use", "recognition_point"],
+      "expected_behavior": ["single_recommendation", "observable_requirements", "block_script_conflict", "offer_functional_motif"]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "BundledSkillLockV1",
+  "skill": "ai-script-breakdown",
+  "files": {
+    "SKILL.md": "bf60e93b66ae793eca49b549f9b15b44d8778f5a93ebff26f5d9cec658b9d17e",
+    "agents/openai.yaml": "a9fa9b087153319de52740feea22c9d77a06d3f74c34de25a948a716dd89548a",
+    "references/ai-feasibility.md": "a51c21d92d9abfb2f0b4fd36984d9043d752ddd7e762d47cb424cb5a51cbf8a2",
+    "references/format-and-evidence.md": "394ad4950d55d51ceea0dc6e7345a550f0e64b9c1a44c5c5ea574a46e480f2ab",
+    "references/output-contract.md": "457623b3e491d225b695cdfcdbb9a4048fb92cce535d6b47c46b2308dd9cefcf",
+    "references/roles/art-storyboard.md": "153b556020bb6c1e96535735e5c6917bf8853cbd201af43822c50b11bb7cbf30",
+    "references/roles/creative-direction.md": "2e8a7a2f79cbe7988dddca2415c79a2a299b900a7aeb9001d4e6f1a2c0768a60",
+    "references/roles/execution-performance.md": "4b06bd5836a0b7b8f4b136e7bd87778a8571b4ef2c9d37e7f70d65bef32c681e",
+    "references/roles/extensions.md": "70d82261e24253a9a3dfebb37f83442b95d9d9eedc3f7d18e3013b9855ddc8d1",
+    "references/shared-analysis.md": "4c8428c98250386bc51328f8d9e0b32cf75fbf21b3a851f4a21da8d8f5248bb1",
+    "references/theory-index.md": "ebb0213654fbffb090ba21285e4ff9183a9ed32c4130732e55aa0bf831a04495",
+    "references/workflow.md": "3e13183b6849ec9ff15df72cfd7f75ccfe599c89463ded947414365ca465299c",
+    "schemas/breakdown.schema.json": "6fbdda140e54ad479e266827775ee02257125575502a156576c7952306cd775d",
+    "schemas/draft-impact.schema.json": "88280efc0f220f3b032ee5fb894985e49eac2c7e980cfea2938c886908dd5981",
+    "schemas/intake.schema.json": "3147083eb7070d910846a2010c33facd5b953826a2967ad27768582ce8d9a5bd",
+    "scripts/compare_drafts.py": "4e1d29c603273e026133bf2a647a38b8549dc4942d0d470fc2d222b1a41d8bb8",
+    "scripts/normalize_screenplay.py": "f5765fb23e3d7a408f7dcbd67274ab6b0b2c1abe4cdab1464f11fd6a623404a1",
+    "scripts/validate_breakdown.py": "6516dd14a183701583c49d6dc70f2855534f6ec3c892610c886b851c29e538b2",
+    "tests/fixtures/sample.fdx": "f99015bcb821fd66640c9e64324b23ef6d367c81976707740b938c18c849b4e9",
+    "tests/fixtures/sample.fountain": "6968986895f0cf18b8bb7f2f935081977e8c3a2b755f8b53bc6fd598340f2141",
+    "tests/fixtures/sample_revision.fountain": "7fd1b413279104ada73aa64770b253b4806232e328eb50f512d69e6272a7ab6c",
+    "tests/test_tools.py": "c36cb1a2e643ffdb7a34ddcf13eb70888022c95ff54cbc35d57cf80d30a64ec0"
+  }
+}

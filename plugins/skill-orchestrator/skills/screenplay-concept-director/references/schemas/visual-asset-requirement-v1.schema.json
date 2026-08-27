@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "VisualAssetRequirementV1",
+  "type": "object",
+  "required": ["schema_version", "version", "baseline_ref", "asset", "primary_state", "derived_states", "design_dimensions", "evidence", "high_impact_decisions", "reference_images", "production_constraints", "cultural_boundaries", "invariants", "exclusions", "acceptance_criteria", "open_questions", "confirmations"],
+  "properties": {
+    "schema_version": {"const": "VisualAssetRequirementV1"},
+    "version": {"type": "string", "pattern": "^v[1-9][0-9]*$"},
+    "baseline_ref": {"type": "object", "required": ["project_id", "draft_id", "source_hash", "breakdown_hash", "analyzer_hash", "context_hash"], "properties": {"source_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "breakdown_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "analyzer_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "asset": {"type": "object", "required": ["asset_id", "asset_type", "name"], "properties": {"asset_id": {"type": "string", "minLength": 1}, "asset_type": {"enum": ["character_master", "location_master", "scene_state", "hero_prop"]}, "name": {"type": "string", "minLength": 1}}},
+    "primary_state": {"type": "object", "required": ["state_id", "asset_id", "label", "design_direction", "design_language", "concrete_elements"]},
+    "derived_states": {"type": "array", "items": {"type": "object", "required": ["state_id", "asset_id", "label", "delta_from", "changes", "source_refs"]}},
+    "design_dimensions": {"type": "object", "required": ["shared", "type_specific"], "properties": {"shared": {"type": "object", "minProperties": 1}, "type_specific": {"type": "object", "minProperties": 1}}},
+    "evidence": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["kind", "statement", "source_refs"], "properties": {"kind": {"enum": ["fact", "inference", "design_decision", "preference", "unknown"]}, "statement": {"type": "string", "minLength": 1}, "source_refs": {"type": "array", "items": {"type": "string"}}}}},
+    "high_impact_decisions": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["chosen_option", "status"], "properties": {"chosen_option": {"type": "string", "minLength": 1}, "status": {"enum": ["accepted", "user_override"]}}}},
+    "reference_images": {"type": "array", "items": {"type": "object", "required": ["source", "controls", "must_not_control"], "properties": {"source": {"const": "user_provided"}, "controls": {"type": "array", "minItems": 1}, "must_not_control": {"type": "array", "minItems": 1}}}},
+    "production_constraints": {"type": "array", "minItems": 1},
+    "cultural_boundaries": {"type": "array"},
+    "invariants": {"type": "array", "minItems": 1},
+    "exclusions": {"type": "array", "minItems": 1},
+    "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "criterion", "method"]}},
+    "open_questions": {"type": "array", "maxItems": 0},
+    "confirmations": {"type": "array", "minItems": 3}
+  }
+}

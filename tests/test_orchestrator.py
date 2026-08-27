@@ -101,6 +101,22 @@ class IndexTests(unittest.TestCase):
             second = orchestrator.build_catalog(base, output, roots=roots(user_root))
             self.assertEqual([record["name"] for record in second["skills"]], ["installed-skill"])
 
+    def test_screenplay_vertical_semantic_types_are_registered(self) -> None:
+        breakdown = orchestrator.infer_enrichment(
+            {"name": "ai-script-breakdown", "description": "Analyze a screenplay"},
+            "# Workflow\nAnalyze only.",
+        )
+        director = orchestrator.infer_enrichment(
+            {"name": "screenplay-concept-director", "description": "Direct one visual asset"},
+            "# Workflow\nWrite a requirement.",
+        )
+        self.assertIn("screenplay_breakdown_v1", breakdown["outputs"])
+        self.assertIn("screenplay_breakdown_v1", director["inputs"])
+        self.assertIn("asset_catalog_v1", director["outputs"])
+        self.assertIn("asset_context_snapshot_v1", director["outputs"])
+        self.assertIn("visual_asset_requirement_v1", director["outputs"])
+        self.assertIn("creative_position_v1", director["outputs"])
+
 
 class RetrievalTests(unittest.IsolatedAsyncioTestCase):
     async def test_bm25_retrieves_and_risk_filter_excludes(self) -> None:

@@ -82,3 +82,17 @@ Machine-readable schemas live in `references/schemas/`. Run `scripts/orchestrato
 ```
 
 Node status is one of `pending`, `running`, `succeeded`, `failed`, `blocked`, or `skipped`. `replans_used` must be 0 or 1.
+
+## Registered screenplay concept types
+
+The orchestrator recognizes these versioned semantic bindings:
+
+| Type | Producer or role |
+| --- | --- |
+| `screenplay_breakdown_v1` | `$ai-script-breakdown` whole-screenplay baseline |
+| `asset_catalog_v1` | Four-type stable asset inventory |
+| `asset_context_snapshot_v1` | Fresh bounded context for one selected asset |
+| `visual_asset_requirement_v1` | Confirmed single-asset design handoff |
+| `creative_position_v1` | Structured and natural-language director position |
+
+For the screenplay-concept vertical, bind `screenplay_breakdown_v1` into `$screenplay-concept-director`. Its specialized validator, not the generic DAG validator, enforces one stable asset id, baseline freshness, three confirmation gates, and the absence of prompt or image-generation fields. The orchestrator must not substitute a GitHub candidate while both bundled sibling Skills are present and valid.

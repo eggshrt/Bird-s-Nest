@@ -1,7 +1,7 @@
 {
   "name": "skill-orchestrator",
-  "version": "0.1.0+codex.20260827053125",
-  "description": "Align spoken requirements, retrieve local Agent Skills, plan a safe DAG, execute after confirmation, and verify the result.",
+  "version": "0.2.0+codex.20260827082004",
+  "description": "Align spoken requirements, orchestrate local Agent Skills, analyze screenplays, and direct one evidence-backed visual asset requirement.",
   "author": {
     "name": "eggshrt"
   },
@@ -9,14 +9,16 @@
   "interface": {
     "displayName": "Skill Orchestrator",
     "shortDescription": "Align requirements and safely orchestrate local skills.",
-    "longDescription": "Turns a spoken need into a confirmed requirement contract, retrieves and reranks local Agent Skills, presents a dependency-aware execution plan, runs only after a second confirmation, and verifies every output.",
+    "longDescription": "Turns a spoken need into a confirmed requirement contract, retrieves local Agent Skills, and runs a verified DAG. Its screenplay vertical builds a fresh whole-script baseline and directs exactly one character, location, scene state, or hero prop into a confirmed visual requirement without generating prompts or images.",
     "developerName": "eggshrt",
     "category": "Productivity",
     "capabilities": [
       "Requirement alignment",
       "Local skill retrieval",
       "DAG planning",
-      "Verified execution"
+      "Verified execution",
+      "Screenplay breakdown",
+      "Single-asset concept direction"
     ],
     "defaultPrompt": "Use $skill-orchestrator to align this request, retrieve the right skills, and propose a safe execution plan."
   }

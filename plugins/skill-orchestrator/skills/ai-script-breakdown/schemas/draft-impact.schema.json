@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-script-breakdown/draft-impact.schema.json",
+  "title": "AI Script Breakdown Draft Impact",
+  "type": "object",
+  "required": ["schema_version", "old_draft", "new_draft", "matches", "added_scenes", "removed_scenes", "ambiguous_matches", "entity_changes", "role_impacts", "summary"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "old_draft": {"$ref": "#/$defs/draftRef"},
+    "new_draft": {"$ref": "#/$defs/draftRef"},
+    "matches": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/match"}
+    },
+    "added_scenes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/sceneRef"}
+    },
+    "removed_scenes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/sceneRef"}
+    },
+    "ambiguous_matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["new_scene_id", "candidate_old_scene_ids", "reason"],
+        "properties": {
+          "new_scene_id": {"type": "string"},
+          "candidate_old_scene_ids": {"type": "array", "items": {"type": "string"}},
+          "reason": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "entity_changes": {
+      "type": "object",
+      "required": ["characters", "locations", "props", "effects"],
+      "properties": {
+        "characters": {"$ref": "#/$defs/changeSet"},
+        "locations": {"$ref": "#/$defs/changeSet"},
+        "props": {"$ref": "#/$defs/changeSet"},
+        "effects": {"$ref": "#/$defs/changeSet"}
+      },
+      "additionalProperties": false
+    },
+    "role_impacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role_id", "scene_ids", "reasons", "required_action"],
+        "properties": {
+          "role_id": {"type": "string"},
+          "scene_ids": {"type": "array", "items": {"type": "string"}},
+          "reasons": {"type": "array", "items": {"type": "string"}},
+          "required_action": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["unchanged", "modified", "added", "removed", "ambiguous"],
+      "properties": {
+        "unchanged": {"type": "integer", "minimum": 0},
+        "modified": {"type": "integer", "minimum": 0},
+        "added": {"type": "integer", "minimum": 0},
+        "removed": {"type": "integer", "minimum": 0},
+        "ambiguous": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "draftRef": {
+      "type": "object",
+      "required": ["source_id", "draft_id", "sha256"],
+      "properties": {
+        "source_id": {"type": "string"},
+        "draft_id": {"type": "string"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      },
+      "additionalProperties": true
+    },
+    "sceneRef": {
+      "type": "object",
+      "required": ["scene_id", "heading", "source_refs"],
+      "properties": {
+        "scene_id": {"type": "string"},
+        "heading": {"type": "string"},
+        "source_refs": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "match": {
+      "type": "object",
+      "required": ["old_scene_id", "new_scene_id", "retained_scene_id", "match_basis", "confidence", "similarity", "change_type", "heading_changed", "text_changed"],
+      "properties": {
+        "old_scene_id": {"type": "string"},
+        "new_scene_id": {"type": "string"},
+        "retained_scene_id": {"type": "string"},
+        "match_basis": {"enum": ["scene_number", "heading", "text_similarity"]},
+        "confidence": {"enum": ["high", "medium"]},
+        "similarity": {"type": "number", "minimum": 0, "maximum": 1},
+        "change_type": {"enum": ["unchanged", "modified"]},
+        "heading_changed": {"type": "boolean"},
+        "text_changed": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "changeSet": {
+      "type": "object",
+      "required": ["added", "removed", "changed"],
+      "properties": {
+        "added": {"type": "array", "items": {"type": "string"}},
+        "removed": {"type": "array", "items": {"type": "string"}},
+        "changed": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

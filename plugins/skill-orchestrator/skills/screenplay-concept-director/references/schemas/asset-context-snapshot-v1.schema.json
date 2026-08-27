@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AssetContextSnapshotV1",
+  "type": "object",
+  "required": ["schema_version", "created_at", "project", "draft_id", "source_hash", "breakdown_hash", "analyzer_hash", "asset", "global_visual_context", "relevant_scenes", "relevant_beats", "role_findings", "role_deliverables", "ai_feasibility", "inclusion", "freshness", "context_hash"],
+  "properties": {
+    "schema_version": {"const": "AssetContextSnapshotV1"},
+    "created_at": {"type": "string", "minLength": 1},
+    "project": {"type": "object", "required": ["id"]},
+    "draft_id": {"type": "string", "minLength": 1},
+    "source_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "breakdown_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "analyzer_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "asset": {"type": "object", "required": ["asset_id", "asset_type"]},
+    "global_visual_context": {"type": "object"},
+    "relevant_scenes": {"type": "array"},
+    "relevant_beats": {"type": "array"},
+    "role_findings": {"type": "array"},
+    "role_deliverables": {"type": "object"},
+    "ai_feasibility": {"type": "object"},
+    "inclusion": {"type": "object", "required": ["scene_ids", "beat_ids", "finding_ids", "omitted_scene_ids", "omitted_beat_ids", "omitted_finding_ids", "full_screenplay_included"], "properties": {"full_screenplay_included": {"const": false}}},
+    "freshness": {"type": "object", "required": ["status", "reasons"], "properties": {"status": {"enum": ["fresh", "stale"]}, "reasons": {"type": "array", "items": {"type": "string"}}}},
+    "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

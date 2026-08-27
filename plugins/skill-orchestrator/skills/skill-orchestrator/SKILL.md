@@ -20,6 +20,8 @@ Never execute task nodes until all gates before them are satisfied.
 
 If any gate is incomplete, continue alignment or planning; do not call task-execution tools.
 
+When a plan uses the bundled screenplay vertical, bind `$ai-script-breakdown` output type `screenplay_breakdown_v1` into `$screenplay-concept-director`. Use the semantic registrations in [interfaces.md](references/interfaces.md). Do not invoke GitHub fallback for these roles while both bundled sibling Skills validate successfully. The specialized director validator remains authoritative for its single-asset, freshness, evidence, confirmation, and no-prompt constraints.
+
 ## Phase 1: Requirement alignment
 
 Use `$grill-me` as the interview engine. Preserve its question format and frontier discipline. Do not invent a separate interview flow.

@@ -28,6 +28,21 @@ from agentskills_retrieval import LexicalSelector
 
 CATALOG_VERSION = "SkillCatalogV1"
 RISK_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
+BUILTIN_SEMANTIC_TYPES = {
+    "ai-script-breakdown": {
+        "inputs": ["screenplay_source"],
+        "outputs": ["screenplay_breakdown_v1"],
+    },
+    "screenplay-concept-director": {
+        "inputs": ["screenplay_source", "screenplay_breakdown_v1", "user_reference_image"],
+        "outputs": [
+            "asset_catalog_v1",
+            "asset_context_snapshot_v1",
+            "visual_asset_requirement_v1",
+            "creative_position_v1",
+        ],
+    },
+}
 ASCII_TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|password|secret)\s*[:=]\s*[^\s,;]+"),
@@ -153,8 +168,9 @@ def infer_enrichment(meta: dict[str, Any], body: str) -> dict[str, Any]:
     else:
         risk = "low"
 
-    inputs = []
-    outputs = []
+    registered = BUILTIN_SEMANTIC_TYPES.get(name, {})
+    inputs = listify(metadata.get("input_types")) + list(registered.get("inputs", []))
+    outputs = listify(metadata.get("output_types")) + list(registered.get("outputs", []))
     for item_type, pattern in {
         "image": r"\b(image|photo|png|jpg|jpeg)\b",
         "video": r"\b(video|mp4|movie)\b",

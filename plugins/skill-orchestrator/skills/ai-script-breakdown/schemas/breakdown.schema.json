@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-script-breakdown/breakdown.schema.json",
+  "title": "AI Script Breakdown Result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "project",
+    "source_manifest",
+    "coverage",
+    "global_analysis",
+    "entities",
+    "scenes",
+    "beats",
+    "ai_feasibility",
+    "role_reports",
+    "issues",
+    "cross_role_decisions",
+    "theory_trace",
+    "handoff"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "project": {
+      "type": "object",
+      "required": ["id", "format", "production_model"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": ["string", "null"]},
+        "format": {"enum": ["feature", "short", "episode", "vertical_drama"]},
+        "target_duration_minutes": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "aspect_ratio": {"type": ["string", "null"]},
+        "language": {"type": ["string", "null"]},
+        "production_model": {"const": "fully_ai_photoreal_live_action"}
+      },
+      "additionalProperties": true
+    },
+    "source_manifest": {"$ref": "#/$defs/sourceManifest"},
+    "coverage": {"$ref": "#/$defs/coverage"},
+    "global_analysis": {
+      "type": "object",
+      "required": ["story_contract", "narrative_form", "causal_spine", "character_system", "information_design", "theme_values", "setup_payoff", "world_rules", "rhythm", "continuity"],
+      "properties": {
+        "story_contract": {"type": "object"},
+        "narrative_form": {"type": "object"},
+        "causal_spine": {"type": "array", "items": {"type": "object"}},
+        "character_system": {"type": "object"},
+        "information_design": {"type": "object"},
+        "theme_values": {"type": "object"},
+        "setup_payoff": {"type": "array", "items": {"type": "object"}},
+        "world_rules": {"type": "array", "items": {"type": "object"}},
+        "rhythm": {"type": "object"},
+        "continuity": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "entities": {
+      "type": "object",
+      "required": ["characters", "locations", "props", "effects"],
+      "properties": {
+        "characters": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+        "locations": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+        "props": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+        "effects": {"type": "array", "items": {"$ref": "#/$defs/entity"}}
+      },
+      "additionalProperties": true
+    },
+    "scenes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/scene"}
+    },
+    "beats": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/beat"}
+    },
+    "ai_feasibility": {"$ref": "#/$defs/aiFeasibility"},
+    "role_reports": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/roleReport"}
+    },
+    "issues": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "cross_role_decisions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/decision"}
+    },
+    "theory_trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["theory_id", "applied_to", "reason"],
+        "properties": {
+          "theory_id": {"type": "string", "minLength": 1},
+          "applied_to": {"type": "array", "items": {"type": "string"}},
+          "reason": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "required": ["artifacts", "ready_for", "blocked_by"],
+      "properties": {
+        "artifacts": {"type": "array", "items": {"type": "string"}},
+        "ready_for": {"type": "array", "items": {"type": "string"}},
+        "blocked_by": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "sourceManifest": {
+      "type": "object",
+      "required": ["source_id", "draft_id", "format", "sha256", "extraction_quality", "warnings"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "draft_id": {"type": "string", "minLength": 1},
+        "filename": {"type": ["string", "null"]},
+        "format": {"enum": ["text", "txt", "markdown", "fountain", "fdx", "pdf", "docx"]},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "line_count": {"type": ["integer", "null"], "minimum": 0},
+        "paragraph_count": {"type": ["integer", "null"], "minimum": 0},
+        "character_count": {"type": "integer", "minimum": 1},
+        "extraction_quality": {"enum": ["good", "degraded", "failed"]},
+        "reference_scheme": {"type": "string"},
+        "warnings": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["status", "requested_scene_ids", "completed_scene_ids", "pending_scene_ids", "requested_role_ids", "completed_role_ids", "pending_role_ids", "ai_baseline_completed", "cross_role_synthesis_completed", "current_batch", "continuation_anchor"],
+      "properties": {
+        "status": {"enum": ["blocked", "partial", "completed"]},
+        "requested_scene_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "completed_scene_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "pending_scene_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "requested_role_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "completed_role_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "pending_role_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "ai_baseline_completed": {"type": "boolean"},
+        "cross_role_synthesis_completed": {"type": "boolean"},
+        "current_batch": {"type": ["string", "null"]},
+        "continuation_anchor": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "name", "source_refs", "certainty"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "source_refs": {"type": "array", "items": {"type": "string"}},
+        "scene_ids": {"type": "array", "items": {"type": "string"}},
+        "certainty": {"enum": ["explicit", "inferred", "unknown"]}
+      },
+      "additionalProperties": true
+    },
+    "scene": {
+      "type": "object",
+      "required": ["id", "heading", "source_refs", "certainty", "entry_state", "exit_state", "summary"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^scn-[0-9]{3,}$"},
+        "scene_number": {"type": ["string", "null"]},
+        "heading": {"type": "string"},
+        "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "certainty": {"enum": ["explicit", "inferred"]},
+        "entry_state": {"type": "object"},
+        "exit_state": {"type": "object"},
+        "summary": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "beat": {
+      "type": "object",
+      "required": ["id", "scene_id", "source_refs", "change", "entry_state", "exit_state"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^bea-[0-9]{3,}$"},
+        "scene_id": {"type": "string", "pattern": "^scn-[0-9]{3,}$"},
+        "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "change": {"type": "string", "minLength": 1},
+        "entry_state": {"type": "object"},
+        "exit_state": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "finding": {
+      "type": "object",
+      "required": ["id", "role_id", "source_refs", "scene_ids", "beat_ids", "certainty", "confidence", "severity", "observation", "impact", "recommendation", "theory_refs"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^fnd-[0-9]{3,}$"},
+        "role_id": {"type": "string", "minLength": 1},
+        "source_refs": {"type": "array", "items": {"type": "string"}},
+        "scene_ids": {"type": "array", "items": {"type": "string"}},
+        "beat_ids": {"type": "array", "items": {"type": "string"}},
+        "certainty": {"enum": ["explicit", "inferred", "unknown"]},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "severity": {"enum": ["blocker", "high", "medium", "low"]},
+        "observation": {"type": "string", "minLength": 1},
+        "impact": {"type": "string", "minLength": 1},
+        "recommendation": {"type": "string", "minLength": 1},
+        "theory_refs": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "roleReport": {
+      "type": "object",
+      "required": ["role_id", "display_name", "status", "contract", "findings", "deliverables", "dependencies", "blockers"],
+      "properties": {
+        "role_id": {"type": "string", "minLength": 1},
+        "display_name": {"type": "string", "minLength": 1},
+        "status": {"enum": ["blocked", "partial", "completed"]},
+        "contract": {"type": "object"},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "deliverables": {"type": "object"},
+        "dependencies": {"type": "array", "items": {"type": "string"}},
+        "blockers": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "decision": {
+      "type": "object",
+      "required": ["id", "topic", "affected_role_ids", "source_refs", "conflict", "options", "recommended_option", "decision_owner", "required_by", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^dec-[0-9]{3,}$"},
+        "topic": {"type": "string", "minLength": 1},
+        "affected_role_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "source_refs": {"type": "array", "items": {"type": "string"}},
+        "conflict": {"type": "string"},
+        "options": {"type": "array", "items": {"type": "string"}},
+        "recommended_option": {"type": ["string", "null"]},
+        "decision_owner": {"type": "string", "minLength": 1},
+        "required_by": {"type": ["string", "null"]},
+        "status": {"enum": ["open", "proposed", "approved", "blocked"]}
+      },
+      "additionalProperties": false
+    },
+    "aiFeasibility": {
+      "type": "object",
+      "required": ["asset_locks", "continuity_requirements", "complexity_flags", "reference_requirements", "duration_pressure", "audio_dependencies", "risks", "fallbacks", "blockers"],
+      "properties": {
+        "asset_locks": {"type": "array", "items": {"type": "object"}},
+        "continuity_requirements": {"type": "array", "items": {"type": "object"}},
+        "complexity_flags": {"type": "array", "items": {"type": "object"}},
+        "reference_requirements": {"type": "array", "items": {"type": "object"}},
+        "duration_pressure": {"type": "array", "items": {"type": "object"}},
+        "audio_dependencies": {"type": "array", "items": {"type": "object"}},
+        "risks": {"type": "array", "items": {"type": "object"}},
+        "fallbacks": {"type": "array", "items": {"type": "object"}},
+        "blockers": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
