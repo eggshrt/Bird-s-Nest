@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RequirementContractV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "goal", "asset_input", "audience", "target_platform", "in_scope", "out_of_scope", "constraints", "acceptance_criteria", "collaboration_context", "confirmations", "open_questions"],
+  "properties": {
+    "schema_version": {"const": "RequirementContractV2"},
+    "goal": {"type": "string", "minLength": 1},
+    "asset_input": {"type": "object", "additionalProperties": false, "required": ["asset_id", "asset_type", "requirement_path", "requirement_hash"], "properties": {"asset_id": {"type": "string"}, "asset_type": {"enum": ["character_master", "location_master", "scene_state", "hero_prop"]}, "requirement_path": {"type": "string"}, "requirement_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "audience": {"type": "array", "items": {"type": "string"}},
+    "target_platform": {"type": "string"},
+    "in_scope": {"type": "array", "items": {"type": "string"}},
+    "out_of_scope": {"type": "array", "items": {"type": "string"}},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "acceptance_criteria": {"type": "array"},
+    "collaboration_context": {"type": "object"},
+    "confirmations": {"type": "array"},
+    "open_questions": {"type": "array", "maxItems": 0}
+  }
+}

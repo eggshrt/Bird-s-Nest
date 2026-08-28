@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AgentResultV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "status", "summary", "claims", "evidence_refs", "artifact_refs", "conflicts", "questions", "errors", "metrics"],
+  "properties": {"schema_version": {"const": "AgentResultV1"}, "task_id": {"type": "string"}, "status": {"enum": ["succeeded", "failed", "blocked", "degraded"]}, "summary": {"type": "string"}, "claims": {"type": "array", "items": {"type": "object"}}, "evidence_refs": {"type": "array", "items": {"type": "string"}}, "artifact_refs": {"type": "array", "items": {"type": "object"}}, "conflicts": {"type": "array", "items": {"type": "object"}}, "questions": {"type": "array", "maxItems": 3}, "errors": {"type": "array", "items": {"type": "string"}}, "metrics": {"type": "object"}}
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExternalCapabilityReviewV1",
+  "type": "object",
+  "required": ["schema_version", "gap", "source", "license", "maintenance", "agent_skill_format", "scripts", "permissions", "side_effects", "decision"],
+  "properties": {
+    "schema_version": {"const": "ExternalCapabilityReviewV1"},
+    "gap": {"type": "string"},
+    "source": {"type": "string"},
+    "license": {"type": ["string", "null"]},
+    "maintenance": {"type": "string"},
+    "agent_skill_format": {"type": "boolean"},
+    "scripts": {"type": "array"},
+    "permissions": {"type": "array"},
+    "side_effects": {"type": "array"},
+    "decision": {"enum": ["reject", "candidate_only", "independent_reimplementation"]}
+  }
+}

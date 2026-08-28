@@ -1,0 +1,6 @@
+interface:
+  display_name: "Image Prompt Team"
+  short_description: "Expert DAG for one evidence-bound master prompt"
+  default_prompt: "Use $image-prompt-team to turn my sealed single-asset requirement into one confirmed visual spec and one OpenAI-ready Chinese master prompt."
+policy:
+  allow_implicit_invocation: false

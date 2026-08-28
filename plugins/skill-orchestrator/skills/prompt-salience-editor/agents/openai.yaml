@@ -1,0 +1,6 @@
+interface:
+  display_name: "Prompt Salience Editor"
+  short_description: "Prunes prompt content by visible impact"
+  default_prompt: "Use $prompt-salience-editor only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

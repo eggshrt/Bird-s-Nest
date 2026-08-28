@@ -1,0 +1,6 @@
+interface:
+  display_name: "Prop Asset Designer"
+  short_description: "Audits hero-prop design and handling"
+  default_prompt: "Use $prop-asset-designer only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

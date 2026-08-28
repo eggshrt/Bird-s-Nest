@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eggshrt.github.io/Bird-s-Nest/schemas/visual-prompt-spec-v1.schema.json",
+  "title": "VisualPromptSpecV1",
+  "type": "object",
+  "required": ["schema_version", "asset_id", "asset_type", "requirement_hash", "intended_use", "framing", "aspect_ratio", "evidence_capsule", "blocks", "visibility_matrix", "invariants", "exclusions", "expert_positions", "conflicts", "resolutions", "rebuttal_rounds", "spec_confirmation"],
+  "properties": {
+    "schema_version": {"const": "VisualPromptSpecV1"},
+    "asset_id": {"type": "string", "minLength": 1},
+    "asset_type": {"enum": ["character_master", "location_master", "scene_state", "hero_prop"]},
+    "requirement_hash": {"type": "string", "minLength": 1},
+    "intended_use": {"type": "string", "minLength": 1},
+    "framing": {"type": "string", "minLength": 1},
+    "aspect_ratio": {"type": "string", "minLength": 1},
+    "evidence_capsule": {"type": "array"},
+    "blocks": {"type": "object"},
+    "visibility_matrix": {"type": "array"},
+    "invariants": {"type": "array"},
+    "exclusions": {"type": "array"},
+    "expert_positions": {"type": "array", "minItems": 7},
+    "conflicts": {"type": "array"},
+    "resolutions": {"type": "array"},
+    "rebuttal_rounds": {"type": "integer", "minimum": 0, "maximum": 1},
+    "spec_confirmation": {"type": "object"}
+  }
+}

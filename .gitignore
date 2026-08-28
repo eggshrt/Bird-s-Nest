@@ -3,4 +3,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .codex/skill-orchestrator/
+runtime-v2.sqlite3*
 work/
+/outputs/

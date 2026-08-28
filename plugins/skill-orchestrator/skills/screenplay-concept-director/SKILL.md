@@ -1,6 +1,9 @@
 ---
 name: screenplay-concept-director
 description: Explicit-only director for turning one screenplay character, location, scene state, or hero prop into a confirmed, evidence-backed visual concept requirement. Use only when the user explicitly invokes $screenplay-concept-director; this skill never writes image-generation prompts or generates images.
+metadata:
+  input_types: [screenplay_breakdown_v1]
+  output_types: [asset_catalog_v1, asset_context_snapshot_v1, visual_asset_requirement_v1, creative_position_v1]
 ---
 
 # Screenplay Concept Director
@@ -48,9 +51,9 @@ Produce `CreativePositionV1` alongside the requirement. It must include both str
 
 ## Contract and output
 
-Read [interfaces.md](references/interfaces.md) before drafting machine-readable output. `VisualAssetRequirementV1` is the sole future downstream handoff. It must have an empty `open_questions` list, accepted or explicitly overridden high-impact decisions, three confirmations, source provenance, observable acceptance criteria, and no prompt-generation fields.
+Read [interfaces.md](references/interfaces.md) before drafting machine-readable output. `VisualAssetRequirementV1` is the sole downstream handoff accepted by `$image-prompt-team`. It must have an empty `open_questions` list, accepted or explicitly overridden high-impact decisions, three confirmations, source provenance, observable acceptance criteria, and no prompt-generation fields.
 
-After the second confirmation, show exact destination, files, validators, risks, and exclusions. After the third confirmation, run `validate-requirement` and `materialize`. Write to the path defined in [output-contract.md](references/output-contract.md), then record observable validation evidence in the parent orchestrator's `RunReportV1`.
+After the second confirmation, show exact destination, files, validators, risks, and exclusions. After the third confirmation, run `validate-requirement` and `materialize`. Write to the path defined in [output-contract.md](references/output-contract.md), then record observable validation evidence in the parent orchestrator's `RunReportV2` when running under V2.
 
 If validation fails, diagnose and revise only the affected contract once. A second failure stops the run.
 

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eggshrt.github.io/Bird-s-Nest/schemas/expert-position-v1.schema.json",
+  "title": "ExpertPositionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "role", "persona_principle", "recommendation", "evidence_refs", "priority", "objections", "alternative", "confidence", "change_conditions"],
+  "properties": {
+    "schema_version": {"const": "ExpertPositionV1"},
+    "role": {"type": "string", "minLength": 1},
+    "persona_principle": {"type": "string", "minLength": 1},
+    "recommendation": {"type": "string", "minLength": 1},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "priority": {"enum": ["low", "medium", "high", "blocking"]},
+    "objections": {"type": "array", "items": {"type": "string"}},
+    "alternative": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"enum": ["low", "medium", "high"]},
+    "change_conditions": {"type": "string", "minLength": 1}
+  }
+}

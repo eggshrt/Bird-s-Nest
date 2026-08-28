@@ -1,98 +1,38 @@
-# Stable interfaces
+# Skill Orchestrator V2 interfaces
 
-All interfaces use `schema_version` exactly as shown. Unknown additive fields are allowed; required fields may not be omitted.
+V2 is a breaking replacement. It does not import, migrate, or double-write `RequirementContractV1`, `ExecutionPlanV1`, or `RunReportV1`. Machine-readable schemas are in `references/schemas/v2/`.
 
-Machine-readable schemas live in `references/schemas/`. Run `scripts/orchestrator_index.py validate-interface` for semantic checks that JSON Schema alone cannot express, including DAG cycles, bindings, English retrieval terms, and the global retry cap.
+## Contracts
 
-## RequirementContractV1
+- `RequirementContractV2`: goal, one authoritative asset input and hash, audience, target platform, scope, constraints, acceptance, canonical collaboration context, confirmations, and empty open questions.
+- `CollaborationContextV1`: the four quadrants with provenance, confidence, impact, resolution status, and verification.
+- `ExecutionGraphV2`: typed node definitions and a maximum of one automatic replan and three concurrent Agents.
+- `AgentTaskV1`: run/node/task IDs, role, objective, context projection, dependency results, expected output, constraints, permissions, deadline, and dispatcher signature.
+- `AgentResultV1`: status, summary, claims, evidence references, artifact paths/hashes, conflicts, at most three blocking questions per round, errors, and metrics. Large raw source bodies are not embedded.
+- `DagPatchV1`: base graph version, explicit operations, exact invalidation set, semantic impact, evidence, and confirmation requirement.
+- `RunEventV1`: immutable sequence, actor, graph version, correlation/causation IDs, redacted payload, and payload hash.
+- `RunReportV2`: final status, node attempts, degradation/replan state, artifacts, validation, metrics, and conclusion.
 
-```json
-{
-  "schema_version": "RequirementContractV1",
-  "goal": "Observable desired outcome",
-  "audience": ["Who consumes the result"],
-  "inputs": [{"name": "source", "type": "document", "location": "user-provided"}],
-  "deliverables": [{"name": "report", "type": "markdown", "required": true}],
-  "in_scope": ["Included work"],
-  "out_of_scope": ["Excluded work"],
-  "constraints": ["Time, tooling, policy, format, or quality constraint"],
-  "assumptions": [{"statement": "Assumption", "validation": "How it will be checked"}],
-  "acceptance_criteria": [{"id": "AC-1", "criterion": "Observable pass condition", "method": "Verification method"}],
-  "open_questions": [],
-  "retrieval_query": "English capability-oriented query",
-  "retrieval_terms": ["English", "search", "terms"],
-  "confirmed_at": "ISO-8601 timestamp"
-}
-```
+## State
 
-`open_questions` must be empty before the first confirmation. Inputs and deliverables use semantic types so compatible skill outputs can be bound to later inputs.
+Run states are `draft`, `awaiting_initial_confirmation`, `running`, `awaiting_user`, `proposed`, `degraded_pending_acceptance`, `approved`, `failed`, and `canceled`.
 
-## ExecutionPlanV1
+Node states are `pending`, `ready`, `leased`, `running`, `awaiting_input`, `retry_scheduled`, `succeeded`, `failed`, `skipped`, `invalidated`, and `canceled`.
 
-```json
-{
-  "schema_version": "ExecutionPlanV1",
-  "requirement_contract_ref": "requirement.json",
-  "parallel_authorized": false,
-  "retry_policy": {"max_replans": 1},
-  "nodes": [
-    {
-      "id": "N1",
-      "skill": {"name": "example-skill", "path": "/absolute/path/SKILL.md", "content_hash": "sha256"},
-      "goal": "Node-local outcome",
-      "input_bindings": [{"input": "source", "from": "requirement.inputs.source"}],
-      "expected_outputs": [{"name": "result", "type": "markdown"}],
-      "depends_on": [],
-      "execution_mode": "serial",
-      "permissions": ["filesystem:read"],
-      "side_effects": [],
-      "risk": "low",
-      "confirmation_required": false,
-      "verification": {"method": "Inspect generated file", "evidence": "Path and checks"}
-    }
-  ],
-  "confirmed_at": null
-}
-```
+Only a final user confirmation changes a prompt package run from `proposed` to `approved`. A degraded run remains unapproved until the user explicitly accepts the degradation.
 
-`depends_on` forms a DAG. `from` may reference `requirement.*` or an earlier node as `<node-id>.outputs.<name>`. `execution_mode` is `serial` unless `parallel_authorized` is true and the node is independent. Risks are `low`, `medium`, `high`, or `critical`.
+## Conflict authority
 
-## RunReportV1
+- Facts: original source evidence, then current validated breakdown, then sealed requirement summary, then Agent inference.
+- Creative choices: latest sealed requirement and explicit user decisions, then Agent recommendation.
+- Production: explicit production constraints, then validated production rules, then Agent preference.
 
-```json
-{
-  "schema_version": "RunReportV1",
-  "plan_ref": "plan.json",
-  "started_at": "ISO-8601 timestamp",
-  "completed_at": "ISO-8601 timestamp",
-  "nodes": [
-    {
-      "id": "N1",
-      "status": "succeeded",
-      "artifacts": [{"name": "result", "type": "markdown", "location": "/absolute/path"}],
-      "validation_evidence": [{"criterion": "AC-1", "result": "pass", "evidence": "Observed fact"}],
-      "errors": [],
-      "attempts": 1
-    }
-  ],
-  "replans_used": 0,
-  "final_status": "succeeded",
-  "conclusion": "Concise evidence-backed conclusion"
-}
-```
+Severe evidence conflicts and high-impact aesthetic conflicts pause for the user. The adjudicator provides one recommendation and the evidence that could change it; it does not count votes.
 
-Node status is one of `pending`, `running`, `succeeded`, `failed`, `blocked`, or `skipped`. `replans_used` must be 0 or 1.
+## Registered semantic types
 
-## Registered screenplay concept types
+The existing screenplay types remain registered: `screenplay_breakdown_v1`, `asset_catalog_v1`, `asset_context_snapshot_v1`, `visual_asset_requirement_v1`, and `creative_position_v1`.
 
-The orchestrator recognizes these versioned semantic bindings:
+V2 adds `requirement_contract_v2`, `collaboration_context_v1`, `execution_graph_v2`, `agent_task_v1`, `agent_result_v1`, `dag_patch_v1`, `run_event_v1`, and `run_report_v2`. v0.4 additionally registers `expert_position_v1`, `visual_prompt_spec_v1`, `reference_role_v1`, `prompt_salience_plan_v1`, `image_prompt_package_v2`, `derivative_request_v1`, and `external_capability_review_v1`.
 
-| Type | Producer or role |
-| --- | --- |
-| `screenplay_breakdown_v1` | `$ai-script-breakdown` whole-screenplay baseline |
-| `asset_catalog_v1` | Four-type stable asset inventory |
-| `asset_context_snapshot_v1` | Fresh bounded context for one selected asset |
-| `visual_asset_requirement_v1` | Confirmed single-asset design handoff |
-| `creative_position_v1` | Structured and natural-language director position |
-
-For the screenplay-concept vertical, bind `screenplay_breakdown_v1` into `$screenplay-concept-director`. Its specialized validator, not the generic DAG validator, enforces one stable asset id, baseline freshness, three confirmation gates, and the absence of prompt or image-generation fields. The orchestrator must not substitute a GitHub candidate while both bundled sibling Skills are present and valid.
+`ImagePromptPackageV1` is read/export-only. New runs write `ImagePromptPackageV2`, which contains one asset, one confirmed spec hash, and one main prompt. It cannot contain a regenerated design statement, `negative_prompt`, model parameters, images, image-generation fields, or a second asset ID.

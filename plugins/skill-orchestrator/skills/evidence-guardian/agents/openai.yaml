@@ -1,0 +1,6 @@
+interface:
+  display_name: "Evidence Guardian"
+  short_description: "Checks provenance, invariants, and asset boundaries"
+  default_prompt: "Use $evidence-guardian only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

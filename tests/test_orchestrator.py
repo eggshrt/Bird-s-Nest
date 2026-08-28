@@ -116,6 +116,13 @@ class IndexTests(unittest.TestCase):
         self.assertIn("asset_context_snapshot_v1", director["outputs"])
         self.assertIn("visual_asset_requirement_v1", director["outputs"])
         self.assertIn("creative_position_v1", director["outputs"])
+        prompt_team = orchestrator.infer_enrichment(
+            {"name": "image-prompt-team", "description": "Create one approved image prompt package"},
+            "# Workflow\nConsume one sealed visual asset requirement.",
+        )
+        self.assertIn("visual_asset_requirement_v1", prompt_team["inputs"])
+        self.assertIn("visual_prompt_spec_v1", prompt_team["outputs"])
+        self.assertIn("image_prompt_package_v2", prompt_team["outputs"])
 
 
 class RetrievalTests(unittest.IsolatedAsyncioTestCase):
@@ -145,78 +152,101 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
                 await orchestrator.search_catalog(catalog, "生成图片")
 
 
-class PlanValidationTests(unittest.TestCase):
-    def node(self, node_id: str, depends: list[str] | None = None, binding: str = "requirement.inputs.source") -> dict:
+class GraphValidationTests(unittest.TestCase):
+    def context(self) -> dict:
         return {
-            "id": node_id,
-            "skill": {"name": "sample", "path": "/sample/SKILL.md", "content_hash": "abc"},
-            "goal": "produce output",
-            "input_bindings": [{"input": "source", "from": binding}],
-            "expected_outputs": [{"name": "result", "type": "text"}],
-            "depends_on": depends or [],
-            "execution_mode": "serial",
-            "risk": "low",
-            "verification": {"method": "compare", "evidence": "test"},
+            "schema_version": "CollaborationContextV1",
+            "shared_known": [{"id": "K1", "statement": "one asset", "provenance": "contract", "confidence": 1.0, "impact": "high", "status": "confirmed", "verification": "hash"}],
+            "user_context_gaps": [],
+            "agent_added_context": [],
+            "joint_unknown_hypotheses": [],
         }
 
-    def plan(self, nodes: list[dict], max_replans: int = 1, parallel_authorized: bool = False) -> dict:
-        return {"schema_version": "ExecutionPlanV1", "parallel_authorized": parallel_authorized, "retry_policy": {"max_replans": max_replans}, "nodes": nodes}
+    def node(self, node_id: str, depends: list[str] | None = None, binding: str = "requirement.asset_input") -> dict:
+        return {
+            "node_id": node_id,
+            "role_skill": f"sample-{node_id.lower()}",
+            "objective": f"produce output for {node_id}",
+            "input_bindings": [{"name": "source", "from": binding}],
+            "output_schema": "AgentResultV1",
+            "depends_on": depends or [],
+            "execution_mode": "serial",
+            "idempotent": True,
+            "soft_timeout_seconds": 300,
+            "hard_timeout_seconds": 600,
+            "permissions": ["project:read"],
+            "side_effects": [],
+            "risk": "low",
+            "verification": {"method": "schema_and_evidence"},
+        }
+
+    def graph(self, nodes: list[dict], max_replans: int = 1, max_concurrency: int = 3) -> dict:
+        return {"schema_version": "ExecutionGraphV2", "graph_version": 1, "max_concurrency": max_concurrency, "max_replans": max_replans, "nodes": nodes}
 
     def test_valid_binding(self) -> None:
         first = self.node("N1")
         second = self.node("N2", ["N1"], "N1.outputs.result")
-        self.assertEqual(orchestrator.validate_plan(self.plan([first, second])), [])
+        self.assertEqual(orchestrator.validate_plan(self.graph([first, second])), [])
 
     def test_cycle_is_rejected(self) -> None:
         first = self.node("N1", ["N2"], "N2.outputs.result")
         second = self.node("N2", ["N1"], "N1.outputs.result")
-        self.assertTrue(any("cycle" in error for error in orchestrator.validate_plan(self.plan([first, second]))))
+        self.assertTrue(any("cycle" in error for error in orchestrator.validate_plan(self.graph([first, second]))))
 
-    def test_unknown_output_binding_is_rejected(self) -> None:
+    def test_undeclared_dependency_binding_is_rejected(self) -> None:
         first = self.node("N1")
-        second = self.node("N2", ["N1"], "N1.outputs.missing")
-        self.assertTrue(any("unknown output" in error for error in orchestrator.validate_plan(self.plan([first, second]))))
+        second = self.node("N2", [], "N1.outputs.result")
+        self.assertTrue(any("not a declared dependency" in error for error in orchestrator.validate_plan(self.graph([first, second]))))
 
     def test_more_than_one_replan_is_rejected(self) -> None:
-        errors = orchestrator.validate_plan(self.plan([self.node("N1")], max_replans=2))
+        errors = orchestrator.validate_plan(self.graph([self.node("N1")], max_replans=2))
         self.assertTrue(any("max_replans" in error for error in errors))
 
-    def test_parallel_requires_explicit_authorization(self) -> None:
-        node = self.node("N1")
-        node["execution_mode"] = "parallel"
-        errors = orchestrator.validate_plan(self.plan([node], parallel_authorized=False))
-        self.assertTrue(any("explicit authorization" in error for error in errors))
+    def test_concurrency_above_three_is_rejected(self) -> None:
+        errors = orchestrator.validate_plan(self.graph([self.node("N1")], max_concurrency=4))
+        self.assertTrue(any("max_concurrency" in error for error in errors))
 
-    def test_requirement_rejects_open_questions_and_non_english_query(self) -> None:
+    def test_forbidden_external_side_effect_is_rejected(self) -> None:
+        node = self.node("N1")
+        node["side_effects"] = ["external_write"]
+        self.assertTrue(any("forbidden" in error for error in orchestrator.validate_plan(self.graph([node]))))
+
+    def test_exact_responsibility_overlap_is_rejected(self) -> None:
+        first, second = self.node("N1"), self.node("N2")
+        second["objective"] = first["objective"]
+        self.assertTrue(any("responsibility overlap" in error for error in orchestrator.validate_plan(self.graph([first, second]))))
+
+    def test_requirement_rejects_open_questions(self) -> None:
         contract = {
-            "schema_version": "RequirementContractV1",
-            "goal": "result",
+            "schema_version": "RequirementContractV2",
+            "goal": "produce one prompt package",
+            "asset_input": {"asset_id": "chr-001", "asset_type": "character_master", "requirement_path": "/tmp/requirement.json", "requirement_hash": "a" * 64},
             "audience": ["user"],
-            "inputs": [],
-            "deliverables": [],
+            "target_platform": "openai",
             "in_scope": [],
             "out_of_scope": [],
             "constraints": [],
-            "assumptions": [],
-            "acceptance_criteria": [{"id": "AC-1", "criterion": "exists", "method": "inspect"}],
+            "acceptance_criteria": [{"id": "AC-1", "criterion": "one prompt", "method": "inspect"}],
+            "collaboration_context": self.context(),
+            "confirmations": [],
             "open_questions": ["which format"],
-            "retrieval_query": "生成文档",
-            "retrieval_terms": [],
         }
         errors = orchestrator.validate_requirement(contract)
         self.assertTrue(any("open_questions" in error for error in errors))
-        self.assertTrue(any("English/ASCII" in error for error in errors))
 
     def test_report_enforces_single_replan_and_two_attempt_limit(self) -> None:
         report = {
-            "schema_version": "RunReportV1",
-            "plan_ref": "plan.json",
-            "started_at": "2026-01-01T00:00:00Z",
-            "completed_at": "2026-01-01T00:01:00Z",
-            "nodes": [{"id": "N1", "status": "failed", "artifacts": [], "validation_evidence": [], "errors": ["failure"], "attempts": 3}],
+            "schema_version": "RunReportV2",
+            "run_id": "run-1",
+            "graph_version": 1,
+            "status": "failed",
+            "nodes": [{"node_id": "N1", "status": "failed", "attempts": 3}],
             "replans_used": 2,
-            "final_status": "failed",
-            "conclusion": "failed",
+            "conflicts": [],
+            "degradations": [],
+            "validation_evidence": [],
+            "metrics": {},
+            "conclusion": "execution failed",
         }
         errors = orchestrator.validate_report(report)
         self.assertTrue(any("replans_used" in error for error in errors))
@@ -252,12 +282,12 @@ class SecurityAndBehaviorTests(unittest.TestCase):
     def test_control_protocol_contains_required_behavior_gates(self) -> None:
         body = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         required_phrases = [
-            "obtain explicit confirmation",
-            "Obtain a second explicit confirmation",
-            "only when the user explicitly authorizes subagents",
+            "Require explicit `$skill-orchestrator` invocation",
+            "RequirementContractV2",
+            "never silently change task semantics",
+            "Idempotent nodes retry once",
             "Never auto-install",
-            "retry at most once",
-            "Then rebuild the local index and regenerate the DAG",
+            "Danger mode is a host prerequisite",
         ]
         combined = body + (SKILL_ROOT / "references" / "github-fallback.md").read_text(encoding="utf-8")
         for phrase in required_phrases:

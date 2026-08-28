@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AgentTaskV1",
+  "type": "object",
+  "required": ["schema_version", "run_id", "node_id", "task_id", "role_skill", "objective", "requirement", "collaboration_context_projection", "dependency_results", "expected_output_schema", "constraints", "permissions", "deadline_seconds", "dispatcher_signature"],
+  "properties": {"schema_version": {"const": "AgentTaskV1"}, "run_id": {"type": "string"}, "node_id": {"type": "string"}, "task_id": {"type": "string"}, "role_skill": {"type": "string"}, "objective": {"type": "string"}, "requirement": {"type": "object"}, "collaboration_context_projection": {"type": "object"}, "dependency_results": {"type": "object"}, "expected_output_schema": {"type": "string"}, "constraints": {"type": "array"}, "permissions": {"type": "array"}, "deadline_seconds": {"type": "integer"}, "dispatcher_signature": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

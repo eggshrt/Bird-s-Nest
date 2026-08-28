@@ -1,0 +1,6 @@
+interface:
+  display_name: "Prompt Architect"
+  short_description: "Reads legacy prompt-draft nodes only"
+  default_prompt: "Use $prompt-architect only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

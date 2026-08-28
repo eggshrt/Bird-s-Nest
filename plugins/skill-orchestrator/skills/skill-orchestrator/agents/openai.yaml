@@ -1,6 +1,6 @@
 interface:
   display_name: "Skill Orchestrator"
-  short_description: "Align requirements, retrieve skills, and run a verified DAG"
-  default_prompt: "Use $skill-orchestrator to align my request, retrieve suitable skills, and propose a safe execution plan."
+  short_description: "Align requirements and run a recoverable multi-Agent DAG"
+  default_prompt: "Use $skill-orchestrator to align my request, retrieve suitable skills, and run a recoverable V2 execution graph."
 policy:
   allow_implicit_invocation: false

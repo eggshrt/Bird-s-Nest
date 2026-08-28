@@ -1,0 +1,6 @@
+interface:
+  display_name: "Environment Asset Designer"
+  short_description: "Audits pure-environment spatial design"
+  default_prompt: "Use $environment-asset-designer only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

@@ -59,4 +59,4 @@ python3 scripts/concept_director.py materialize \
   --output-root <outputs/screenplay-concept-director>
 ```
 
-`materialize` requires the three confirmation records and refuses an existing version directory. Its output contains concept requirements only. The parent orchestrator writes `RunReportV1` in its own audit directory.
+`materialize` requires the three confirmation records and refuses an existing version directory. Its output contains concept requirements only. The V2 parent orchestrator writes `RunReportV2` in its own audit directory.

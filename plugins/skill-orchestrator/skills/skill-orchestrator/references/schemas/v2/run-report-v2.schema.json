@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RunReportV2",
+  "type": "object",
+  "required": ["schema_version", "run_id", "final_status", "graph_version", "degraded", "replans_used", "nodes", "artifacts", "validation", "metrics", "conclusion"],
+  "properties": {"schema_version": {"const": "RunReportV2"}, "run_id": {"type": "string"}, "final_status": {"type": "string"}, "graph_version": {"type": "integer"}, "degraded": {"type": "boolean"}, "replans_used": {"enum": [0, 1]}, "nodes": {"type": "array"}, "artifacts": {"type": "array"}, "validation": {"type": "object"}, "metrics": {"type": "array"}, "conclusion": {"type": "string"}}
+}

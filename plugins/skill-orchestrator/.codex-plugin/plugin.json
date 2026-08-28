@@ -1,25 +1,29 @@
 {
   "name": "skill-orchestrator",
-  "version": "0.2.0+codex.20260827082004",
-  "description": "Align spoken requirements, orchestrate local Agent Skills, analyze screenplays, and direct one evidence-backed visual asset requirement.",
+  "version": "0.4.0+codex.20260828093421",
+  "description": "Turn spoken creative intent into sealed visual requirements, a recoverable expert DAG, and one evidence-bound OpenAI image prompt.",
   "author": {
     "name": "eggshrt"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Skill Orchestrator",
-    "shortDescription": "Align requirements and safely orchestrate local skills.",
-    "longDescription": "Turns a spoken need into a confirmed requirement contract, retrieves local Agent Skills, and runs a verified DAG. Its screenplay vertical builds a fresh whole-script baseline and directs exactly one character, location, scene state, or hero prop into a confirmed visual requirement without generating prompts or images.",
+    "shortDescription": "From screenplay evidence to one controlled visual prompt.",
+    "longDescription": "A local, evidence-first creative pipeline for Codex. It aligns spoken needs, analyzes a screenplay, seals exactly one visual asset, and coordinates independent visual-development experts through a recoverable event-sourced DAG. Three confirmation gates protect intent before one Chinese OpenAI-first master prompt is written; no image, model parameters, or negative prompt are generated.",
     "developerName": "eggshrt",
     "category": "Productivity",
     "capabilities": [
       "Requirement alignment",
       "Local skill retrieval",
       "DAG planning",
-      "Verified execution",
+      "Recoverable Agent execution",
+      "SQLite event replay",
       "Screenplay breakdown",
-      "Single-asset concept direction"
+      "Single-asset concept direction",
+      "Image prompt team",
+      "Visual prompt specification",
+      "Three-gate creative approval"
     ],
-    "defaultPrompt": "Use $skill-orchestrator to align this request, retrieve the right skills, and propose a safe execution plan."
+    "defaultPrompt": "Use $skill-orchestrator to align this request and propose a recoverable V2 Agent DAG, or use $image-prompt-team to compile one sealed VisualAssetRequirementV1 into a confirmed visual spec and one OpenAI-first master prompt."
   }
 }

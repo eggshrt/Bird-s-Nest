@@ -25,6 +25,12 @@ from agentskills_core import (
 )
 from agentskills_retrieval import LexicalSelector
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from orchestrator_runtime import (  # noqa: E402
+    validate_graph as validate_execution_graph,
+    validate_requirement as validate_requirement_contract,
+)
+
 
 CATALOG_VERSION = "SkillCatalogV1"
 RISK_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
@@ -42,6 +48,28 @@ BUILTIN_SEMANTIC_TYPES = {
             "creative_position_v1",
         ],
     },
+    "image-prompt-team": {
+        "inputs": ["visual_asset_requirement_v1"],
+        "outputs": ["visual_prompt_spec_v1", "image_prompt_package_v2", "run_report_v2"],
+    },
+    "evidence-guardian": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["agent_result_v1", "evidence_ledger_v1"]},
+    "prompt-architect": {"inputs": ["agent_task_v1", "evidence_ledger_v1"], "outputs": ["agent_result_v1", "platform_neutral_prompt_draft_v1"]},
+    "visual-production-critic": {"inputs": ["agent_task_v1", "platform_neutral_prompt_draft_v1"], "outputs": ["agent_result_v1", "production_critique_v1"]},
+    "adversarial-reviewer": {"inputs": ["agent_task_v1", "platform_neutral_prompt_draft_v1"], "outputs": ["agent_result_v1", "adversarial_review_v1"]},
+    "synthesis-adjudicator": {"inputs": ["agent_task_v1", "production_critique_v1", "adversarial_review_v1"], "outputs": ["agent_result_v1", "adjudicated_prompt_v1"]},
+    "visual-brief-director": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "visual-hierarchy-director": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "design-language-director": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "motif-curator": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "color-light-director": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "camera-composition-director": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "character-asset-designer": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "environment-asset-designer": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "prop-asset-designer": {"inputs": ["agent_task_v1", "visual_asset_requirement_v1"], "outputs": ["expert_position_v1"]},
+    "visual-spec-assembler": {"inputs": ["agent_task_v1", "expert_position_v1"], "outputs": ["visual_prompt_spec_v1"]},
+    "prompt-salience-editor": {"inputs": ["agent_task_v1", "visual_prompt_spec_v1"], "outputs": ["prompt_salience_plan_v1"]},
+    "openai-image-prompt-compiler": {"inputs": ["agent_task_v1", "visual_prompt_spec_v1", "prompt_salience_plan_v1"], "outputs": ["image_prompt_package_v2"]},
+    "reference-role-director": {"inputs": ["agent_task_v1", "user_reference_image"], "outputs": ["reference_role_v1"]},
 }
 ASCII_TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 SECRET_PATTERNS = [
@@ -372,7 +400,7 @@ class ResolvedPathProvider(SkillProvider):
 
 async def search_catalog(catalog_path: Path, query: str, limit: int = 12, max_risk: str = "critical", deny_permissions: list[str] | None = None, require_outputs: list[str] | None = None, require_inputs: list[str] | None = None) -> dict[str, Any]:
     if not ASCII_TOKEN.search(query):
-        raise ValueError("The retrieval query needs English/ASCII capability terms; generate it from RequirementContractV1.")
+        raise ValueError("The retrieval query needs English/ASCII capability terms derived from RequirementContractV2.")
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     source_records = {record["name"]: record for record in catalog.get("skills", [])}
     records: dict[str, dict[str, Any]] = {}
@@ -440,38 +468,20 @@ async def search_catalog(catalog_path: Path, query: str, limit: int = 12, max_ri
 
 
 def validate_requirement(contract: dict[str, Any]) -> list[str]:
-    errors: list[str] = []
-    required = {"schema_version", "goal", "audience", "inputs", "deliverables", "in_scope", "out_of_scope", "constraints", "assumptions", "acceptance_criteria", "open_questions", "retrieval_query", "retrieval_terms"}
-    missing = sorted(required - contract.keys())
-    if missing:
-        errors.append(f"missing fields: {', '.join(missing)}")
-    if contract.get("schema_version") != "RequirementContractV1":
-        errors.append("schema_version must be RequirementContractV1")
-    for field in ("audience", "inputs", "deliverables", "in_scope", "out_of_scope", "constraints", "assumptions", "acceptance_criteria", "open_questions", "retrieval_terms"):
-        if field in contract and not isinstance(contract[field], list):
-            errors.append(f"{field} must be a list")
-    if contract.get("open_questions"):
-        errors.append("open_questions must be empty before planning")
-    if not isinstance(contract.get("retrieval_query"), str) or not ASCII_TOKEN.search(contract.get("retrieval_query", "")):
-        errors.append("retrieval_query must contain English/ASCII capability terms")
-    criteria = contract.get("acceptance_criteria", [])
-    for index, criterion in enumerate(criteria if isinstance(criteria, list) else []):
-        if not isinstance(criterion, dict) or not all(criterion.get(key) for key in ("id", "criterion", "method")):
-            errors.append(f"acceptance_criteria[{index}] must contain id, criterion, and method")
-    return sorted(set(errors))
+    return validate_requirement_contract(contract)
 
 
 def validate_report(report: dict[str, Any]) -> list[str]:
     errors: list[str] = []
-    required = {"schema_version", "plan_ref", "started_at", "completed_at", "nodes", "replans_used", "final_status", "conclusion"}
+    required = {"schema_version", "run_id", "final_status", "graph_version", "degraded", "replans_used", "nodes", "artifacts", "validation", "metrics", "conclusion"}
     missing = sorted(required - report.keys())
     if missing:
         errors.append(f"missing fields: {', '.join(missing)}")
-    if report.get("schema_version") != "RunReportV1":
-        errors.append("schema_version must be RunReportV1")
+    if report.get("schema_version") != "RunReportV2":
+        errors.append("schema_version must be RunReportV2")
     if report.get("replans_used") not in (0, 1):
         errors.append("replans_used must be 0 or 1")
-    statuses = {"pending", "running", "succeeded", "failed", "blocked", "skipped"}
+    statuses = {"pending", "ready", "leased", "running", "awaiting_input", "retry_scheduled", "succeeded", "failed", "skipped", "invalidated", "canceled"}
     nodes = report.get("nodes", [])
     if not isinstance(nodes, list):
         errors.append("nodes must be a list")
@@ -481,98 +491,22 @@ def validate_report(report: dict[str, Any]) -> list[str]:
         if not isinstance(node, dict):
             errors.append(f"nodes[{index}] must be an object")
             continue
-        node_id = node.get("id")
+        node_id = node.get("node_id")
         if not node_id or node_id in seen:
             errors.append(f"nodes[{index}] has missing or duplicate id")
         if node_id:
             seen.add(node_id)
         if node.get("status") not in statuses:
             errors.append(f"{node_id} has invalid status")
-        if not isinstance(node.get("attempts"), int) or not 1 <= node["attempts"] <= 2:
-            errors.append(f"{node_id} attempts must be 1 or 2")
-        for field in ("artifacts", "validation_evidence", "errors"):
-            if not isinstance(node.get(field), list):
-                errors.append(f"{node_id}.{field} must be a list")
+        if not isinstance(node.get("attempts"), int) or not 0 <= node["attempts"] <= 2:
+            errors.append(f"{node_id} attempts must be between 0 and 2")
+        if not isinstance(node.get("errors", []), list):
+            errors.append(f"{node_id}.errors must be a list")
     return sorted(set(errors))
 
 
 def validate_plan(plan: dict[str, Any]) -> list[str]:
-    errors: list[str] = []
-    required = {"schema_version", "parallel_authorized", "retry_policy", "nodes"}
-    missing = sorted(required - plan.keys())
-    if missing:
-        errors.append(f"missing fields: {', '.join(missing)}")
-    if plan.get("schema_version") != "ExecutionPlanV1":
-        errors.append("schema_version must be ExecutionPlanV1")
-    retry = plan.get("retry_policy", {})
-    if not isinstance(retry, dict) or retry.get("max_replans") not in (0, 1):
-        errors.append("retry_policy.max_replans must be 0 or 1")
-    nodes = plan.get("nodes", [])
-    if not isinstance(nodes, list) or not nodes:
-        errors.append("nodes must be a non-empty list")
-        return errors
-    node_map: dict[str, dict[str, Any]] = {}
-    for index, node in enumerate(nodes):
-        if not isinstance(node, dict):
-            errors.append(f"nodes[{index}] must be an object")
-            continue
-        node_id = node.get("id")
-        if not isinstance(node_id, str) or not node_id:
-            errors.append(f"nodes[{index}].id is required")
-            continue
-        if node_id in node_map:
-            errors.append(f"duplicate node id: {node_id}")
-        node_map[node_id] = node
-        for field in ("skill", "goal", "input_bindings", "expected_outputs", "depends_on", "execution_mode", "risk", "verification"):
-            if field not in node:
-                errors.append(f"{node_id} missing {field}")
-        if node.get("risk") not in RISK_ORDER:
-            errors.append(f"{node_id} has invalid risk")
-        if node.get("execution_mode") == "parallel" and not plan.get("parallel_authorized", False):
-            errors.append(f"{node_id} is parallel without explicit authorization")
-    for node_id, node in node_map.items():
-        dependencies = node.get("depends_on", [])
-        if not isinstance(dependencies, list):
-            errors.append(f"{node_id}.depends_on must be a list")
-            continue
-        for dependency in dependencies:
-            if dependency not in node_map:
-                errors.append(f"{node_id} references missing dependency {dependency}")
-        for binding in node.get("input_bindings", []):
-            if not isinstance(binding, dict) or not isinstance(binding.get("from"), str):
-                errors.append(f"{node_id} has invalid input binding")
-                continue
-            source = binding["from"]
-            match = re.fullmatch(r"([A-Za-z0-9_-]+)\.outputs\.([A-Za-z0-9_-]+)", source)
-            if source.startswith("requirement."):
-                continue
-            if not match:
-                errors.append(f"{node_id} has invalid binding source {source}")
-                continue
-            source_id, output_name = match.groups()
-            if source_id not in dependencies:
-                errors.append(f"{node_id} binding {source} is not a declared dependency")
-                continue
-            outputs = {item.get("name") for item in node_map.get(source_id, {}).get("expected_outputs", []) if isinstance(item, dict)}
-            if output_name not in outputs:
-                errors.append(f"{node_id} binding references unknown output {source}")
-    state: dict[str, int] = {}
-
-    def visit(node_id: str) -> None:
-        if state.get(node_id) == 1:
-            errors.append(f"cycle detected at {node_id}")
-            return
-        if state.get(node_id) == 2:
-            return
-        state[node_id] = 1
-        for dependency in node_map[node_id].get("depends_on", []):
-            if dependency in node_map:
-                visit(dependency)
-        state[node_id] = 2
-
-    for node_id in node_map:
-        visit(node_id)
-    return sorted(set(errors))
+    return validate_execution_graph(plan)
 
 
 def audit_skill(root: Path) -> dict[str, Any]:
@@ -694,7 +628,7 @@ def parser() -> argparse.ArgumentParser:
     interface = commands.add_parser("validate-interface", help="Validate a stable orchestrator interface.")
     interface.add_argument("--type", choices=["requirement", "plan", "report"], required=True)
     interface.add_argument("--file", type=Path, required=True)
-    plan = commands.add_parser("validate-plan", help="Validate ExecutionPlanV1 bindings and DAG.")
+    plan = commands.add_parser("validate-plan", help="Validate ExecutionGraphV2 bindings and DAG.")
     plan.add_argument("--plan", type=Path, required=True)
     audit = commands.add_parser("audit-skill", help="Statically audit an external skill tree.")
     audit.add_argument("--path", type=Path, required=True)
@@ -723,15 +657,10 @@ def main() -> int:
                 contract = json.loads(args.contract.read_text(encoding="utf-8"))
                 errors = validate_requirement(contract)
                 if errors:
-                    raise ValueError("Invalid RequirementContractV1: " + "; ".join(errors))
-                query = contract["retrieval_query"]
-                required_inputs.extend(item.get("type") for item in contract.get("inputs", []) if isinstance(item, dict) and item.get("type"))
-                required_outputs.extend(item.get("type") for item in contract.get("deliverables", []) if isinstance(item, dict) and item.get("type"))
-                policy = contract.get("routing_policy", {}) if isinstance(contract.get("routing_policy"), dict) else {}
-                denied_permissions.extend(listify(policy.get("deny_permissions")))
-                max_risk = policy.get("max_risk", max_risk)
-                if max_risk not in RISK_ORDER:
-                    raise ValueError("routing_policy.max_risk is invalid")
+                    raise ValueError("Invalid RequirementContractV2: " + "; ".join(errors))
+                query = " ".join((contract.get("goal", ""), contract.get("target_platform", ""), contract.get("asset_input", {}).get("asset_type", "")))
+                required_inputs.append("visual_asset_requirement_v1")
+                required_outputs.append("image_prompt_package_v2")
             payload = asyncio.run(search_catalog(args.catalog, query, args.limit, max_risk, denied_permissions, required_outputs, required_inputs))
             write_json(payload, args.output)
         elif args.command == "validate-interface":

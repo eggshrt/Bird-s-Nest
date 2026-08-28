@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CollaborationContextV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "version", "shared_known", "user_context_gaps", "agent_added_context", "joint_unknown_hypotheses"],
+  "properties": {
+    "schema_version": {"const": "CollaborationContextV1"},
+    "version": {"type": "integer", "minimum": 1},
+    "shared_known": {"$ref": "#/$defs/items"},
+    "user_context_gaps": {"$ref": "#/$defs/items"},
+    "agent_added_context": {"$ref": "#/$defs/items"},
+    "joint_unknown_hypotheses": {"$ref": "#/$defs/items"}
+  },
+  "$defs": {
+    "items": {"type": "array", "items": {"type": "object", "required": ["id", "statement", "provenance", "status"], "properties": {"id": {"type": "string"}, "statement": {"type": "string"}, "provenance": {"type": "string"}, "confidence": {"type": "string"}, "impact": {"type": "string"}, "status": {"type": "string"}, "verification": {}}}}
+  }
+}

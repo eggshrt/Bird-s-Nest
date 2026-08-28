@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visual Hierarchy Director"
+  short_description: "Controls focus, flow, and information density"
+  default_prompt: "Use $visual-hierarchy-director only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false
