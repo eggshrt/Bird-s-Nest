@@ -83,17 +83,102 @@ outputs/image-prompt-team/<project>/<draft>/assets/<asset-id>/<version>/
 
 项目审计位于 `.codex/skill-orchestrator/`，默认不提交 Git。事件永久保留，只有显式 `prune` 才删除。
 
-## 23 个 Skills
+## 能力谱系：23 个 Skills
 
-用户入口：
+Bird's Nest 不是把 23 个 Skills 平铺成一个工具箱，而是让证据沿着一条受控生产链逐层收束：
 
-- `$grill-me` — 压力测试和关闭设计树。
-- `$skill-orchestrator` — Skill 索引、契约、DAG、确认门与恢复。
-- `$ai-script-breakdown` — 全剧分析，只分析、不生成提示词。
-- `$screenplay-concept-director` — 封版一个视觉资产需求。
-- `$image-prompt-team` — 唯一提示词团队入口。
+```text
+口述想法 / 剧本
+│
+├─ 需求对齐
+│  └─ grill-me
+│
+├─ 全剧事实基线
+│  └─ ai-script-breakdown
+│
+├─ 单资产概念封版
+│  └─ screenplay-concept-director
+│     ├─ 人物母版
+│     ├─ 地点母版
+│     ├─ 具体场景状态
+│     └─ 核心道具
+│
+└─ 单资产图像提示词生产
+   └─ image-prompt-team
+      │
+      ├─ 证据与边界
+      │  └─ evidence-guardian
+      │
+      ├─ 资产专项专家（三选一）
+      │  ├─ character-asset-designer
+      │  ├─ environment-asset-designer
+      │  └─ prop-asset-designer
+      │
+      ├─ 六位固定视觉导演
+      │  ├─ visual-brief-director
+      │  ├─ visual-hierarchy-director
+      │  ├─ design-language-director
+      │  ├─ motif-curator
+      │  ├─ color-light-director
+      │  └─ camera-composition-director
+      │
+      ├─ 用户提供参考图时
+      │  └─ reference-role-director
+      │
+      ├─ 汇总与质检
+      │  ├─ visual-spec-assembler
+      │  ├─ visual-production-critic
+      │  ├─ adversarial-reviewer
+      │  └─ synthesis-adjudicator
+      │
+      └─ 提示词输出
+         ├─ prompt-salience-editor
+         └─ openai-image-prompt-compiler
+```
 
-内部角色均为 dispatcher-only，直接调用会停止并指向 `$image-prompt-team`。`$prompt-architect` 仅保留旧运行读取兼容，不进入 v0.4 新 DAG。
+### 五个用户入口
+
+| Skill | 职责 | 核心产出 |
+| --- | --- | --- |
+| `$grill-me` | 暴露假设、偏好、风险和共同未知 | 关闭设计树后的共同理解 |
+| `$ai-script-breakdown` | 完整分析剧本并建立可追溯事实基线 | `screenplay_breakdown_v1` |
+| `$screenplay-concept-director` | 为一个人物、地点、场景状态或道具完成概念封版 | `VisualAssetRequirementV1` |
+| `$image-prompt-team` | 通过可恢复专家 DAG 形成视觉规格和唯一母提示词 | `VisualPromptSpecV1`、`ImagePromptPackageV2` |
+| `$skill-orchestrator` | 通用需求对齐、Skill 检索、类型绑定和运行恢复 | `RequirementContractV2`、`RunReportV2` |
+
+其余 18 个 Skills 是内部角色。它们只接受调度器签名的 `AgentTaskV1`，直接调用会停止并指向 `$image-prompt-team`；这能避免专家绕过单资产边界、确认门和审计记录。`$prompt-architect` 仅用于读取旧 v0.3 运行，不进入 v0.4 新 DAG。
+
+### 数据如何逐层继承
+
+```text
+剧本原文
+  ↓
+screenplay_breakdown_v1
+全剧事实、人物、世界观、文化和制作基线
+  ↓
+AssetCatalogV1 + AssetContextSnapshotV1
+稳定资产 ID、相关证据和受限上下文
+  ↓
+VisualAssetRequirementV1
+经用户封版的单资产概念需求
+  ↓
+VisualPromptSpecV1
+经多专家审查和证据裁决的可观察视觉规格
+  ↓
+ImagePromptPackageV2
+中文设计阐述、唯一 OpenAI 母提示词和折叠审计引用
+```
+
+每一层只能具象化和压缩已经确认的上游信息。剧本事实不能被 Agent 偏好覆盖；高影响设计缺口必须返回概念导演，不能在提示词阶段偷偷补写。
+
+### 当前可用范围
+
+- 人物母版和纯环境资产是当前主能力；核心道具已经实现，但仍标记为实验能力。
+- 地点和场景状态进入提示词团队时必须是纯环境，不得暗中加入第二个角色或资产。
+- 用户参考图可以参与，但每张图只能控制声明过的维度，并同时声明不得控制的维度。
+- v0.4 唯一生产级适配器是 OpenAI 中文主提示词。
+
+当前明确不包含自动图像生成、多资产联合封版、人物与环境合成、镜头组连续性、视频提示词、模型参数、LoRA/ControlNet、自动联网搜图或自动安装外部 Skill。这些边界不是能力描述上的省略，而是运行时验证器会主动拒绝的内容。
 
 ## 运行时与测试
 
