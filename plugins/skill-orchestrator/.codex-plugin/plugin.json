@@ -1,15 +1,15 @@
 {
   "name": "skill-orchestrator",
-  "version": "0.4.0+codex.20260828093421",
-  "description": "Turn spoken creative intent into sealed visual requirements, a recoverable expert DAG, and one evidence-bound OpenAI image prompt.",
+  "version": "0.4.0+codex.20260901025748",
+  "description": "Turn a screenplay and references into one sealed visual asset, an expert-reviewed visual spec, and one evidence-bound Chinese OpenAI image prompt.",
   "author": {
     "name": "eggshrt"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Skill Orchestrator",
-    "shortDescription": "From screenplay evidence to one controlled visual prompt.",
-    "longDescription": "A local, evidence-first creative pipeline for Codex. It aligns spoken needs, analyzes a screenplay, seals exactly one visual asset, and coordinates independent visual-development experts through a recoverable event-sourced DAG. Three confirmation gates protect intent before one Chinese OpenAI-first master prompt is written; no image, model parameters, or negative prompt are generated.",
+    "shortDescription": "From a full screenplay to one controlled visual asset and prompt.",
+    "longDescription": "An evidence-first visual-development pipeline for Codex. It analyzes a screenplay, limits user references to declared responsibilities, seals exactly one character, environment, scene state, or hero prop, and coordinates independent experts through a recoverable DAG. Three confirmation gates protect intent before one Chinese OpenAI-first master prompt is written. It does not generate images, model parameters, a separate negative prompt, or a second asset.",
     "developerName": "eggshrt",
     "category": "Productivity",
     "capabilities": [
@@ -24,6 +24,6 @@
       "Visual prompt specification",
       "Three-gate creative approval"
     ],
-    "defaultPrompt": "Use $skill-orchestrator to align this request and propose a recoverable V2 Agent DAG, or use $image-prompt-team to compile one sealed VisualAssetRequirementV1 into a confirmed visual spec and one OpenAI-first master prompt."
+    "defaultPrompt": "Use $screenplay-concept-director to analyze my screenplay and seal exactly one visual asset, stopping at every confirmation gate. After the requirement is sealed, use $image-prompt-team to produce one confirmed visual specification and one Chinese OpenAI-first master prompt without generating an image."
   }
 }
