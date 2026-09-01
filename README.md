@@ -13,11 +13,9 @@ Bird's Nest（插件名 `skill-orchestrator`）是一个面向 Codex 的开源�
 
 它优先解决四个常见问题：需求还没说清就开始生成、不同专家互相覆盖、提示词堆砌却没有视觉中心、失败后无法知道哪条决定导致漂移。
 
-## 已走通的真实流程
+## 项目隐私边界
 
-2026 年 9 月，一份 65 集、166 场的真人短剧 DOCX 完成了真实单资产流程：全剧基线、场景状态封版、用户参考图职责限制、三道确认门、15 个 Agent turn 的视觉规格与提示词生产，以及最终哈希绑定和正式文件物化。测试资产在确认过程中经历了“取消泳池与乐队 → 恢复侧翼泳池、加入冷月光、乐队改为 DJ 台”的高影响改版，旧批准没有泄漏回最终提示词。
-
-这次实测证明三道确认门和人工可恢复 DAG 可以完成真实项目交付；同时也暴露了严格响应 schema 与 App Server 中断问题，最终通过受控恢复完成。它不是无人值守稳定性或付费出图 A/B 已完成的声明，完整边界见[质量状态](docs/quality-status.md)。
+公开仓库只包含通用 Skills、运行时、schemas、合成测试和方法文档，不收录任何用户剧本、参考图、资产目录、概念契约、生成提示词、运行报告或项目案例。所有项目产物默认写入仓库外的任务目录；仓库根目录的 `/outputs/` 也被 Git 忽略。
 
 ## 为什么它不只是“提示词模板”
 
@@ -36,7 +34,7 @@ Bird's Nest（插件名 `skill-orchestrator`）是一个面向 Codex 的开源�
 在 Plan Mode 中显式调用概念导演：
 
 ```text
-$screenplay-concept-director 请基于剧本基线，和我一起封版“林夏”的人物母版需求。
+$screenplay-concept-director 请基于我上传的剧本建立基线，并和我一起只封版一个视觉资产。
 ```
 
 它复用 `$ai-script-breakdown` 的全剧证据和 `$grill-me` 的对齐协议，生成严格单资产、开放问题为空的 `VisualAssetRequirementV1`。这一阶段只定义设计，不生成提示词或图像。
@@ -46,7 +44,7 @@ $screenplay-concept-director 请基于剧本基线，和我一起封版“林夏
 切回普通执行模式：
 
 ```text
-$image-prompt-team 请读取已封版的林夏需求，推荐用途、景别和画幅，并在每一道确认门停下来等我。
+$image-prompt-team 请读取刚刚封版的单资产需求，推荐用途、景别和画幅，并在每一道确认门停下来等我。
 ```
 
 第一次确认会展示资产、用途、画幅、预计 12–15 个 Agent turn、峰值并发 3、权限与 Codex 用量。随后运行：
@@ -207,7 +205,7 @@ PYTHONPATH="$HOME/.codex/cache/skill-orchestrator/runtime/e0420cb50736168f" \
 
 离线 CI 使用确定性假 Agent、SQLite 故障注入和 36 条提示词金标：人物 16、纯环境 12、核心道具 8。覆盖三道确认门、职责隔离、DAG 并发、租约恢复、一次重试、增量图、旧包只读、可见性阻断、纯环境无人和禁字段。
 
-真实 Codex Agent 冒烟与 GPT Image 2 实图 A/B 尚未执行；`v0.4.0` 的发布验证范围是完整离线测试、全部 Skill/Plugin 校验和 App Server 初始化/config 检查。当前正常工作流只产出提示词。详见 [质量状态](docs/quality-status.md) 和 [v0.4 迁移说明](docs/migration-v0.4.md)。
+公开发布声明只覆盖可复现的自动测试、全部 Skill/Plugin 校验和 App Server 初始化/config 检查；不公开用户项目的运行记录或生成结果。当前正常工作流只产出提示词。详见 [质量状态](docs/quality-status.md) 和 [v0.4 迁移说明](docs/migration-v0.4.md)。
 
 ## 方法边界与来源
 
