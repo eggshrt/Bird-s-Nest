@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "DirectorConflictV1", "type": "object",
+  "required": ["conflict_id", "topic", "scene_ids", "impact", "positions", "rebuttal_count", "chief_recommendation", "tradeoff", "change_evidence", "status"],
+  "properties": {"conflict_id": {"type": "string"}, "topic": {"type": "string"}, "scene_ids": {"type": "array"}, "impact": {"enum": ["high", "medium", "low"]}, "positions": {"type": "array", "minItems": 2}, "rebuttal_count": {"type": "integer", "minimum": 0, "maximum": 1}, "chief_recommendation": {"type": "string"}, "tradeoff": {"type": "string"}, "change_evidence": {"type": "string"}, "status": {"enum": ["open", "user_decided"]}, "user_decision": {"type": ["string", "null"]}},
+  "additionalProperties": true
+}

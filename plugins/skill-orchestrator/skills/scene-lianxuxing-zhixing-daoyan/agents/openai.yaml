@@ -1,0 +1,4 @@
+interface:
+  display_name: "连续性执行导演"
+  short_description: "审查轴线、视线、状态衔接、重置与执行风险"
+policy: {allow_implicit_invocation: false}

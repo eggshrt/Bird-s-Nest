@@ -6,3 +6,7 @@ __pycache__/
 runtime-v2.sqlite3*
 work/
 /outputs/
+# User-owned source material and review records stay outside public releases.
+/plugins/skill-orchestrator/skills/director-knowledge-manager/knowledge/inbox/
+/plugins/skill-orchestrator/skills/director-knowledge-manager/knowledge/converted/
+/plugins/skill-orchestrator/skills/director-knowledge-manager/knowledge/reviews/

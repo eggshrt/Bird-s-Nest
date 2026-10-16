@@ -1,13 +1,13 @@
-# v0.4 development workflow
+# v0.8 开发与发布流程
 
-1. Preserve published `v0.2.0`; never rewrite history.
-2. Treat v0.3 as an unpublished implementation waypoint. Do not tag or publish it.
-3. Change schemas before runtime behavior. Keep old `ImagePromptPackageV1` read/export-only.
-4. Run deterministic unit tests and offline E2E with Codex Python 3.12+ and the hash-locked runtime.
-5. Validate all Skills, their `agents/openai.yaml`, the plugin manifest, and repository marketplace.
-6. Run App Server initialization/config smoke without model usage.
-7. Ask for separate usage approval before live Agent turns or GPT Image generation.
-8. Update the plugin cachebuster, reinstall locally, and start a new task for discovery.
-9. Commit, push `main`, and publish only tag `v0.4.0` after required non-paid checks pass.
+1. 保留已公开提交和标签；发布新的 `v0.8.0`，不补发中间开发版本。
+2. 优先维护上游契约与来源校验。概念设计、场景导演、正文编译和提示词编译保持各自的职责与确认流程。
+3. 使用 Codex 提供的 Python 3.12+ 和哈希锁定依赖运行 `tests/` 主套件，再运行 `ai-script-breakdown/tests/`。
+4. 检查全部 38 个 `SKILL.md`、岗位 YAML、插件 manifest、marketplace 注册和文档内链接。
+5. 验证 Word 与 Excel 输出的结构及来源绑定；跨项目导出不得混入固定案例和虚构决定。
+6. 公开树中排除用户剧本、参考图、运行结果、课程原文、转换全文及私人审定记录。开发历史曾包含这些材料时，从已公开提交建立经过整理的新提交，避免把私人历史推送到公开仓库。
+7. 同步 README、升级说明、发布说明、质量记录和插件版本；质量声明仅限本次实际完成的验证。
+8. 推送确认过的公开提交，创建 `v0.8.0` 标签与 GitHub Release，并从远程核对提交、版本、README 与发布状态。
+9. 提醒使用者刷新 marketplace、安装更新并新建 Codex 任务。
 
-The runtime is single-machine and process-recoverable. Cluster failover, hosted services, automatic GitHub Skill installation, external writes, and image generation remain outside v0.4.
+默认自动检查使用合成材料和确定性假 Agent。真实模型调用、图像或视频生成需要另行明确的使用授权。

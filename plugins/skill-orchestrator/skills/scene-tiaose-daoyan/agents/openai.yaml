@@ -1,0 +1,4 @@
+interface:
+  display_name: "调色导演"
+  short_description: "规划色彩状态、肤色保护与跨镜匹配"
+policy: {allow_implicit_invocation: false}

@@ -66,6 +66,16 @@ Each selected role gets an independent `roles/<role-id>.md`. `cross-role-decisio
 
 Keep JSON keys in English. Preserve screenplay quotations in their source language.
 
+Preserve `source_manifest.analysis_provenance` from the normalizer at analysis
+intake: `analyzer_hash`, normalized `source_hash`, absolute `source_path`, and
+`captured_at`. Do not regenerate it after analysis to relabel an old baseline.
+Downstream concept direction rechecks these files and the bundled analyzer. A
+legacy baseline without intake provenance must be reanalyzed before that handoff.
+Persist stdin/document extraction as a source file before normalization when
+concept direction is required. For PDF/DOCX, also pass `--original-source` with
+the original document so changes to either the document or extraction invalidate
+the baseline. The source paths must remain available for later verification.
+
 ## Finding contract
 
 Every item in `issues` and every substantive `role_reports[].findings` item uses:
@@ -130,4 +140,3 @@ python3 scripts/validate_breakdown.py breakdown.json --markdown breakdown.md
 ```
 
 Fix validation errors before reporting completion. If they cannot be fixed without user input, return `partial` or `blocked` with the exact missing decision.
-

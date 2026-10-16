@@ -1,0 +1,4 @@
+interface:
+  display_name: "场景总导演"
+  short_description: "统一导演意图并裁决场景导演组冲突"
+policy: {allow_implicit_invocation: false}

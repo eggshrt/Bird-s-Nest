@@ -1,0 +1,13 @@
+{
+  "template_version": "SceneDirectionDocxTemplateV1",
+  "page": {"size": "A4", "orientation": "portrait", "margins_twips": 1440},
+  "language": "zh-CN",
+  "styles": {
+    "Title": {"bold": true, "half_points": 36},
+    "Heading1": {"bold": true, "half_points": 28},
+    "Heading2": {"bold": true, "half_points": 24},
+    "Normal": {"half_points": 21}
+  },
+  "sections": ["cover", "chief_direction", "scene_chapters", "decision_log", "source_appendix"],
+  "integrity_field": "canonical_json_sha256"
+}

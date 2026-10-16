@@ -1,0 +1,4 @@
+interface:
+  display_name: "特效导演"
+  short_description: "规划天气、群体、环境效果、依赖和备选"
+policy: {allow_implicit_invocation: false}

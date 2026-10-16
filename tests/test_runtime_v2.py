@@ -36,6 +36,13 @@ def contract() -> dict:
     }
 
 
+def authoritative_contract() -> dict:
+    value = contract()
+    value.pop("asset_input")
+    value["authoritative_input"] = {"semantic_type": "scene_direction_requirement_v1", "path": "/tmp/scene.json", "sha256": "b" * 64}
+    return value
+
+
 def node(node_id: str, depends_on: list[str] | None = None, idempotent: bool = True, mode: str = "parallel") -> dict:
     return {
         "node_id": node_id, "role_skill": f"role-{node_id}", "objective": f"objective {node_id}",
@@ -67,6 +74,13 @@ class RuntimeV2Tests(unittest.TestCase):
 
     def store(self) -> object:
         return runtime.EventStore(self.base / "runtime-v2.sqlite3")
+
+    def test_requirement_accepts_generic_authoritative_input_without_breaking_asset_input(self) -> None:
+        self.assertEqual(runtime.validate_requirement(contract()), [])
+        self.assertEqual(runtime.validate_requirement(authoritative_contract()), [])
+        both = authoritative_contract()
+        both["asset_input"] = contract()["asset_input"]
+        self.assertIn("use asset_input or authoritative_input, not both", runtime.validate_requirement(both))
 
     def create_confirmed(self, graph_value: dict) -> tuple[object, str]:
         store = self.store()

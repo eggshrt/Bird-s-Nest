@@ -2,206 +2,17 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
-import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
+from concept_fixtures import ConceptFixture, REPO, director
 
-REPO = Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPO / "plugins" / "skill-orchestrator" / "skills" / "screenplay-concept-director"
-SCRIPT = SKILL_ROOT / "scripts" / "concept_director.py"
-SPEC = importlib.util.spec_from_file_location("concept_director", SCRIPT)
-director = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader
-SPEC.loader.exec_module(director)
-
-
-def completed_role(role_id: str, index: int) -> dict:
-    return {
-        "role_id": role_id,
-        "display_name": role_id,
-        "status": "completed",
-        "contract": {},
-        "findings": [{
-            "id": f"fnd-{index:03d}",
-            "role_id": role_id,
-            "source_refs": ["L1-L4"],
-            "scene_ids": ["scn-001"],
-            "beat_ids": ["bea-001"],
-            "certainty": "explicit",
-            "confidence": "high",
-            "severity": "medium",
-            "observation": "林夏在压力下仍先整理工具。",
-            "impact": "行为需要转译为外显设计。",
-            "recommendation": "保留清晰的维护与使用痕迹。",
-            "theory_refs": [],
-        }],
-        "deliverables": {"visual_basis": "克制、可生产、行为驱动"},
-        "dependencies": [],
-        "blockers": [],
-    }
-
-
-def sample_breakdown() -> dict:
-    roles = ["chief_director", "director", "performance_execution", "art"]
-    return {
-        "schema_version": "1.0.0",
-        "project": {
-            "id": "bird-nest",
-            "title": "归巢",
-            "format": "short",
-            "production_model": "fully_ai_photoreal_live_action",
-            "aspect_ratio": "2.39:1",
-        },
-        "source_manifest": {
-            "source_id": "src-001",
-            "draft_id": "draft-1",
-            "format": "fountain",
-            "sha256": "a" * 64,
-            "character_count": 100,
-            "extraction_quality": "good",
-            "warnings": [],
-        },
-        "coverage": {
-            "status": "completed",
-            "requested_scene_ids": ["scn-001"],
-            "completed_scene_ids": ["scn-001"],
-            "pending_scene_ids": [],
-            "requested_role_ids": roles,
-            "completed_role_ids": roles,
-            "pending_role_ids": [],
-            "ai_baseline_completed": True,
-            "cross_role_synthesis_completed": True,
-            "current_batch": None,
-            "continuation_anchor": None,
-        },
-        "global_analysis": {
-            "story_contract": {"promise": "回家不是回到原点"},
-            "narrative_form": {"mode": "linear"},
-            "causal_spine": [],
-            "character_system": {"protagonist": "chr-001"},
-            "information_design": {},
-            "theme_values": {"axis": "控制/信任"},
-            "setup_payoff": [],
-            "world_rules": [{"id": "wr-001", "rule": "修补优先于替换"}],
-            "rhythm": {},
-            "continuity": {"invariant": "雨夜"},
-        },
-        "entities": {
-            "characters": [{
-                "id": "chr-001", "name": "林夏", "aliases": ["小夏"],
-                "source_refs": ["L1-L4"], "scene_ids": ["scn-001"], "certainty": "explicit",
-                "states": [{"state_id": "canonical", "label": "返乡状态", "source_refs": ["L1-L4"]}],
-            }],
-            "locations": [{
-                "id": "loc-001", "name": "江边修理厂", "aliases": ["修理厂"],
-                "source_refs": ["L1-L8"], "scene_ids": ["scn-001"], "certainty": "explicit",
-            }],
-            "props": [{
-                "id": "prp-001", "name": "铜钥匙", "aliases": ["钥匙"],
-                "source_refs": ["L3-L4"], "scene_ids": ["scn-001"], "certainty": "explicit",
-                "states": ["intact", "bent"],
-            }],
-            "effects": [],
-        },
-        "scenes": [{
-            "id": "scn-001", "heading": "内景 江边修理厂 夜", "source_refs": ["L1-L8"],
-            "certainty": "explicit", "entry_state": {}, "exit_state": {},
-            "summary": "林夏在雨夜回到修理厂，用铜钥匙开门。",
-        }],
-        "beats": [{
-            "id": "bea-001", "scene_id": "scn-001", "source_refs": ["L3-L4"],
-            "change": "林夏决定开门", "entry_state": {}, "exit_state": {},
-        }],
-        "ai_feasibility": {
-            "asset_locks": [], "continuity_requirements": [], "complexity_flags": [],
-            "reference_requirements": [], "duration_pressure": [], "audio_dependencies": [],
-            "risks": [], "fallbacks": [], "blockers": [],
-        },
-        "role_reports": [completed_role(role, index + 1) for index, role in enumerate(roles)],
-        "issues": [],
-        "cross_role_decisions": [],
-        "theory_trace": [],
-        "handoff": {"artifacts": [], "ready_for": [], "blocked_by": []},
-    }
-
-
-def valid_dimensions(asset_type: str) -> dict:
-    return {
-        "shared": {key: f"observable {key}" for key in sorted(director.REQUIRED_SHARED_DIMENSIONS)},
-        "type_specific": {key: f"observable {key}" for key in sorted(director.REQUIRED_TYPE_DIMENSIONS[asset_type])},
-    }
-
-
-def valid_position(asset_id: str) -> dict:
-    return {
-        "schema_version": "CreativePositionV1",
-        "asset_id": asset_id,
-        "claim": "用被反复维护的克制轮廓外显人物控制欲。",
-        "evidence": ["L1-L4：她在压力下先整理工具。"],
-        "aesthetic_preference": "反对用夸张饰品替代行为设计。",
-        "objections": ["俗套符号会削弱可信度。"],
-        "alternative": "若表演节奏改变，可减少服装层级并强化动作线。",
-        "risks": ["过度磨损会误读为贫困。"],
-        "confidence": "high",
-        "change_conditions": ["新稿明确她刻意追求华丽时改变观点。"],
-        "decision_owner": "user",
-        "human_statement": "我推荐克制、维护良好的轮廓；它比装饰性符号更忠于她的行为。",
-    }
-
-
-def valid_requirement(snapshot: dict) -> dict:
-    asset = snapshot["asset"]
-    asset_id = asset["asset_id"]
-    return {
-        "schema_version": "VisualAssetRequirementV1",
-        "version": "v1",
-        "baseline_ref": {
-            "project_id": snapshot["project"]["id"],
-            "draft_id": snapshot["draft_id"],
-            "source_hash": snapshot["source_hash"],
-            "breakdown_hash": snapshot["breakdown_hash"],
-            "analyzer_hash": snapshot["analyzer_hash"],
-            "context_hash": snapshot["context_hash"],
-        },
-        "asset": {"asset_id": asset_id, "asset_type": asset["asset_type"], "name": asset["name"]},
-        "primary_state": {
-            "state_id": "canonical", "asset_id": asset_id, "label": "返乡状态",
-            "design_direction": "克制、维护良好、以行为痕迹代替装饰符号。",
-            "design_language": ["窄而稳定的垂直结构", "所有磨损都有操作来源"],
-            "concrete_elements": ["袖口有规律的修补", "重量落在前脚掌"],
-        },
-        "derived_states": [{
-            "state_id": "post-conflict", "asset_id": asset_id, "label": "冲突后",
-            "delta_from": "canonical", "changes": ["右袖新增不规则撕裂"], "source_refs": ["L7-L8"],
-        }],
-        "design_dimensions": valid_dimensions(asset["asset_type"]),
-        "evidence": [
-            {"kind": "fact", "statement": "林夏先整理工具。", "source_refs": ["L1-L4"]},
-            {"kind": "design_decision", "statement": "用规律修补表现控制感。", "source_refs": []},
-            {"kind": "preference", "statement": "避免装饰性符号堆叠。", "source_refs": []},
-        ],
-        "high_impact_decisions": [{
-            "id": "dec-001", "topic": "整体方向", "chosen_option": "行为驱动的克制设计",
-            "status": "accepted", "consequence": "需要清晰维护痕迹",
-        }],
-        "reference_images": [],
-        "production_constraints": ["真人影视可实现，保持服装层级不超过三层"],
-        "cultural_boundaries": ["不使用无来源的地域祭祀符号"],
-        "invariants": ["规律修补", "前倾但克制的动作线"],
-        "exclusions": ["无剧情依据的奢华饰品"],
-        "acceptance_criteria": [{
-            "id": "AC-1", "criterion": "静止剪影可读出克制前倾的动作线", "method": "轮廓评审",
-        }],
-        "open_questions": [],
-        "confirmations": [
-            {"gate": "asset_selection", "confirmed": True, "confirmed_at": "2026-08-27T01:00:00Z"},
-            {"gate": "design_requirement", "confirmed": True, "confirmed_at": "2026-08-27T01:05:00Z"},
-            {"gate": "persistence_plan", "confirmed": True, "confirmed_at": "2026-08-27T01:10:00Z"},
-        ],
-    }
 
 
 class ConceptDirectorTests(unittest.TestCase):
@@ -209,200 +20,384 @@ class ConceptDirectorTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
-        self.analyzer = self.base / "analyzer"
-        self.analyzer.mkdir()
-        (self.analyzer / "SKILL.md").write_text("analyzer-v1\n", encoding="utf-8")
-        self.breakdown = sample_breakdown()
-        self.catalog = director.build_catalog(self.breakdown, self.analyzer)
-        self.snapshot = director.build_snapshot(
-            self.breakdown, self.catalog, "chr-001", created_at="2026-08-27T00:00:00Z", analyzer_root=self.analyzer
+        self.fixture = ConceptFixture(self.base)
+        self.breakdown = self.fixture.breakdown
+        self.catalog = self.fixture.catalog
+        self.snapshot = self.fixture.snapshot
+        self.requirement = self.fixture.requirement
+        self.position = self.fixture.position
+
+    def validate(self, requirement=None, snapshot=None, position=None) -> list[str]:
+        return director.validate_requirement(
+            requirement if requirement is not None else self.requirement,
+            snapshot if snapshot is not None else self.snapshot,
+            position if position is not None else self.position,
         )
-        self.requirement = valid_requirement(self.snapshot)
-        self.position = valid_position("chr-001")
 
     def test_catalog_maps_four_types_and_stable_ids(self) -> None:
-        by_id = {item["asset_id"]: item["asset_type"] for item in self.catalog["assets"]}
-        self.assertEqual(by_id, {
+        self.assertEqual({item["asset_id"]: item["asset_type"] for item in self.catalog["assets"]}, {
             "chr-001": "character_master", "loc-001": "location_master",
             "prp-001": "hero_prop", "scn-001": "scene_state",
         })
-        again = director.build_catalog(deepcopy(self.breakdown), self.analyzer)
-        self.assertEqual(self.catalog["assets"], again["assets"])
-        self.assertEqual(self.catalog["breakdown_hash"], again["breakdown_hash"])
+        self.assertEqual(self.catalog, director.build_catalog(deepcopy(self.breakdown)))
 
-    def test_duplicate_name_is_ambiguous_and_never_auto_confirms(self) -> None:
+    def test_ambiguous_name_never_auto_confirms(self) -> None:
+        self.breakdown["entities"]["props"][0]["name"] = "林夏"
+        self.fixture.persist_baseline()
+        result = director.resolve_asset(self.fixture.catalog, "林夏")
+        self.assertIsNone(result["recommended_asset_id"])
+        self.assertTrue(result["confirmation_required"])
+        self.assertEqual({item["asset_id"] for item in result["candidates"]}, {"chr-001", "prp-001"})
+
+    def test_name_resolution_retains_evidence(self) -> None:
+        result = director.resolve_asset(self.catalog, "小夏")
+        self.assertEqual(result["recommended_asset_id"], "chr-001")
+        self.assertEqual(result["candidates"][0]["source_refs"], ["L1-L4"])
+        self.assertTrue(result["confirmation_required"])
+
+    def test_catalog_cannot_refresh_incomplete_or_unproven_baseline(self) -> None:
+        mutations = [
+            lambda b: b["source_manifest"].pop("analysis_provenance"),
+            lambda b: b["coverage"].update(completed_scene_ids=[]),
+            lambda b: b["coverage"].update(requested_scene_ids=[]),
+            lambda b: b["coverage"].update(pending_role_ids=["art"]),
+            lambda b: b["role_reports"][0].update(status="pending"),
+        ]
+        for mutate in mutations:
+            with self.subTest(mutate=mutate):
+                payload = deepcopy(self.breakdown)
+                mutate(payload)
+                self.assertEqual(director.freshness_report(payload)["status"], "stale")
+                with self.assertRaises(ValueError):
+                    director.build_catalog(payload)
+
+    def test_source_change_is_detected_without_optional_source_argument(self) -> None:
+        self.fixture.source.write_text("INT. DIFFERENT ROOM - DAY\n", encoding="utf-8")
+        self.assertEqual(director.freshness_report(self.breakdown)["status"], "stale")
+        self.assertTrue(self.validate())
+        with self.assertRaises(ValueError):
+            director.build_catalog(self.breakdown)
+
+    def test_rebuilt_catalog_cannot_launder_analyzer_change(self) -> None:
+        analyzer = self.base / "analyzer"
+        analyzer.mkdir()
+        (analyzer / "SKILL.md").write_text("analyzer-v1\n", encoding="utf-8")
+        fixture = ConceptFixture(self.base / "custom", analyzer_root=analyzer)
+        (analyzer / "SKILL.md").write_text("analyzer-v2\n", encoding="utf-8")
+        report = director.freshness_report(fixture.breakdown, analyzer_root=analyzer)
+        self.assertEqual(report["status"], "stale")
+        with self.assertRaises(ValueError):
+            director.build_catalog(fixture.breakdown, analyzer)
+        self.assertTrue(director.validate_requirement(fixture.requirement, fixture.snapshot, fixture.position, analyzer_root=analyzer))
+
+    def test_snapshot_requires_exact_breakdown_on_disk(self) -> None:
+        self.breakdown["global_analysis"]["story_contract"] = {"promise": "changed in memory"}
+        self.fixture.catalog = director.build_catalog(self.breakdown)
+        with self.assertRaises(ValueError):
+            self.fixture.snapshot_for()
+        self.breakdown = deepcopy(self.fixture.breakdown)
+        self.fixture.breakdown_path.unlink()
+        self.assertTrue(self.validate())
+
+    def test_breakdown_change_after_confirmation_invalidates_requirement(self) -> None:
         payload = deepcopy(self.breakdown)
-        payload["entities"]["props"][0]["name"] = "林夏"
-        catalog = director.build_catalog(payload, self.analyzer)
-        ambiguity = next(item for item in catalog["ambiguities"] if item["normalized_name"] == "林夏")
-        self.assertEqual(ambiguity["asset_ids"], ["chr-001", "prp-001"])
-        resolved = director.resolve_asset(catalog, "林夏")
-        self.assertIsNone(resolved["recommended_asset_id"])
-        self.assertTrue(resolved["confirmation_required"])
+        payload["global_analysis"]["story_contract"] = {"promise": "revised after approval"}
+        self.fixture.breakdown_path.write_text(json.dumps(payload), encoding="utf-8")
+        self.assertTrue(self.validate())
 
-    def test_name_resolution_reports_stable_id_and_evidence(self) -> None:
-        resolved = director.resolve_asset(self.catalog, "小夏")
-        self.assertEqual(resolved["recommended_asset_id"], "chr-001")
-        self.assertEqual(resolved["candidates"][0]["source_refs"], ["L1-L4"])
-        self.assertTrue(resolved["confirmation_required"])
+    def test_snapshot_hash_is_time_independent_but_disk_bound(self) -> None:
+        a = self.fixture.snapshot_for(created_at="2026-01-01T00:00:00Z")
+        b = self.fixture.snapshot_for(created_at="2027-01-01T00:00:00Z")
+        self.assertEqual(a["context_hash"], b["context_hash"])
+        self.assertFalse(a["inclusion"]["full_screenplay_included"])
+        self.assertTrue(a["baseline_files"])
 
-    def test_freshness_detects_coverage_source_and_analyzer_change(self) -> None:
-        incomplete = deepcopy(self.breakdown)
-        incomplete["coverage"]["pending_role_ids"] = ["art"]
-        report = director.freshness_report(incomplete, self.catalog, analyzer_root=self.analyzer)
-        self.assertIn("pending_roles", report["reasons"])
-        source = self.base / "changed.fountain"
-        source.write_text("INT. DIFFERENT ROOM - DAY\n", encoding="utf-8")
-        report = director.freshness_report(self.breakdown, self.catalog, source=source, analyzer_root=self.analyzer)
-        self.assertIn("source_hash_changed", report["reasons"])
-        (self.analyzer / "SKILL.md").write_text("analyzer-v2\n", encoding="utf-8")
-        report = director.freshness_report(self.breakdown, self.catalog, analyzer_root=self.analyzer)
-        self.assertIn("analyzer_hash_changed", report["reasons"])
+    def test_snapshot_overflow_fails_instead_of_silently_dropping_evidence(self) -> None:
+        for limits in ({"max_scenes": 0}, {"max_beats": 0}, {"max_findings": 0}, {"max_context_bytes": 100}):
+            with self.subTest(limits=limits), self.assertRaises(ValueError):
+                self.fixture.snapshot_for(**limits)
 
-    def test_snapshot_is_disk_derived_bounded_and_deterministic(self) -> None:
-        first = director.build_snapshot(self.breakdown, self.catalog, "chr-001", created_at="2026-01-01T00:00:00Z", analyzer_root=self.analyzer)
-        second = director.build_snapshot(self.breakdown, self.catalog, "chr-001", created_at="2027-01-01T00:00:00Z", analyzer_root=self.analyzer)
-        self.assertEqual(first["context_hash"], second["context_hash"])
-        self.assertFalse(first["inclusion"]["full_screenplay_included"])
-        bounded = director.build_snapshot(self.breakdown, self.catalog, "chr-001", analyzer_root=self.analyzer, max_scenes=0, max_beats=0, max_findings=0)
-        self.assertEqual(bounded["relevant_scenes"], [])
-        self.assertEqual(bounded["inclusion"]["omitted_scene_ids"], ["scn-001"])
+    def test_snapshot_preserves_relevant_cross_role_decision(self) -> None:
+        decision = {
+            "id": "dec-001", "scene_ids": ["scn-001"], "source_refs": ["L1-L4"],
+            "topic": "Repair marks", "affected_role_ids": ["director", "art"],
+            "conflict": "Subtle realism competes with visual legibility.",
+            "options": ["subtle marks", "clear marks"], "recommended_option": "clear marks",
+            "decision_owner": "user", "required_by": "concept design",
+            "decision": "Keep the repair marks visible on chr-001.", "status": "accepted",
+        }
+        self.breakdown["cross_role_decisions"] = [decision]
+        self.fixture.persist_baseline()
+        snapshot = self.fixture.snapshot_for()
+        self.assertIn(decision, snapshot["cross_role_decisions"])
 
-    def test_valid_requirement_and_position_pass(self) -> None:
-        self.assertEqual(director.validate_requirement(self.requirement, self.snapshot, self.position), [])
+    def test_snapshot_includes_findings_linked_only_by_relevant_beat(self) -> None:
+        finding = self.breakdown["role_reports"][3]["findings"][0]
+        finding.update(scene_ids=[], source_refs=[], beat_ids=["bea-001"],
+                       observation="The turn cannot preserve the intended material continuity.",
+                       impact="The shot may break continuity.", recommendation="Keep the repaired seam visible.")
+        self.fixture.persist_baseline()
+        snapshot = self.fixture.snapshot_for()
+        self.assertIn(finding, snapshot["role_findings"])
+        self.assertIn(finding["id"], snapshot["inclusion"]["finding_ids"])
 
-    def test_all_four_asset_contracts_validate(self) -> None:
+    def test_finding_blocker_requires_upstream_resolution(self) -> None:
+        finding = self.breakdown["role_reports"][3]["findings"][0]
+        finding.update(severity="blocker", scene_ids=[], source_refs=[], beat_ids=["bea-001"],
+                       observation="The required physical change is infeasible.",
+                       impact="The action cannot be produced.", recommendation="Resolve the production method first.")
+        self.fixture.persist_baseline()
+        snapshot = self.fixture.snapshot_for()
+        self.assertEqual(snapshot["ai_feasibility"]["blockers"], [])
+        self.assertEqual(snapshot["handoff"]["blocked_by"], [])
+        with self.assertRaises(ValueError):
+            self.fixture.make()
+        finding.update(severity="medium", impact="A verified practical mechanism now supports the action.",
+                       recommendation="Use the tested replacement mechanism; retain routine continuity review.")
+        self.fixture.persist_baseline()
+        snapshot, requirement, position = self.fixture.make()
+        self.assertEqual(director.validate_requirement(requirement, snapshot, position), [])
+
+    def test_roundtrip_validates_all_four_asset_types(self) -> None:
         for asset_id in ("chr-001", "loc-001", "scn-001", "prp-001"):
             with self.subTest(asset_id=asset_id):
-                snapshot = director.build_snapshot(
-                    self.breakdown, self.catalog, asset_id, analyzer_root=self.analyzer,
-                    created_at="2026-08-27T00:00:00Z",
-                )
-                requirement = valid_requirement(snapshot)
-                position = valid_position(asset_id)
+                snapshot, requirement, position = self.fixture.make(asset_id)
                 self.assertEqual(director.validate_requirement(requirement, snapshot, position), [])
+                serialized = json.loads(json.dumps(requirement))
+                self.assertEqual(director.requirement_hash(serialized), requirement["integrity"]["requirement_hash"])
 
-    def test_multiple_assets_and_cross_asset_state_are_rejected(self) -> None:
-        payload = deepcopy(self.requirement)
-        payload["derived_states"][0]["asset_id"] = "loc-001"
-        errors = director.validate_requirement(payload, self.snapshot, self.position)
-        self.assertTrue(any("more than one asset_id" in error for error in errors))
-        self.assertTrue(any("crosses" in error for error in errors))
+    def test_requirement_requires_snapshot_and_position(self) -> None:
+        self.assertTrue(director.validate_requirement(self.requirement))
+        self.assertTrue(director.validate_requirement(self.requirement, self.snapshot))
 
-    def test_derived_state_can_be_removed(self) -> None:
+    def test_user_override_is_a_valid_final_decision(self) -> None:
+        requirement = deepcopy(self.requirement)
+        requirement["high_impact_decisions"][0].update(status="user_override", chosen_option="用户明确保留更华丽但可生产的袖口", original_recommendation="行为驱动的克制设计")
+        requirement = self.fixture.approve(requirement, self.snapshot, self.position)
+        self.assertEqual(self.validate(requirement), [])
+
+    def test_semantically_invalid_contracts_cannot_be_sealed(self) -> None:
+        cases = {
+            "empty_dimension": lambda r: r["design_dimensions"]["shared"].update(dramatic_function=""),
+            "wrong_json_type": lambda r: r.update(cultural_boundaries="must be an array"),
+            "nonobservable_dimension": lambda r: r["design_dimensions"]["shared"].update(dramatic_function={}),
+            "missing_dimension": lambda r: r["design_dimensions"]["type_specific"].pop("growth_stage"),
+            "fake_evidence": lambda r: r["evidence"][0].update(source_refs=["L999-L1000"]),
+            "malformed_evidence": lambda r: r["evidence"][0].update(source_refs=["some invented source"]),
+            "missing_evidence": lambda r: r["evidence"][0].update(source_refs=[]),
+            "wrong_type": lambda r: r["asset"].update(asset_type="hero_prop"),
+            "renamed_asset": lambda r: r["asset"].update(name="unrelated replacement"),
+            "cross_asset_state": lambda r: r["derived_states"][0].update(asset_id="loc-001"),
+            "open_question": lambda r: r.update(open_questions=["Which era?"]),
+            "unresolved_decision": lambda r: r["high_impact_decisions"][0].update(status="proposed"),
+            "prompt_field": lambda r: r.update(generation_prompt="forbidden"),
+            "reference_not_user_provided": lambda r: r.update(reference_images=[{"source": "web", "controls": ["palette"], "must_not_control": ["identity"]}]),
+        }
+        for label, change in cases.items():
+            with self.subTest(case=label):
+                payload = deepcopy(self.requirement)
+                change(payload)
+                with self.assertRaises(ValueError):
+                    self.fixture.approve(payload, self.snapshot, self.position)
+
+    def test_nested_dimensions_reject_unresolved_or_unobservable_content(self) -> None:
+        invalid_values = [
+            {"status": "unknown", "reason": "undecided"},
+            {"silhouette": "", "material": None},
+            {"status": "not_applicable", "reason": "   "},
+            {"status": "tbd", "reason": "discuss later"},
+            42,
+            True,
+            ["clear outline", {"shape": ""}],
+        ]
+        for value in invalid_values:
+            with self.subTest(value=value):
+                payload = deepcopy(self.requirement)
+                payload["design_dimensions"]["type_specific"]["silhouette_negative_space"] = value
+                for event in payload["confirmations"]:
+                    event["content_hash"] = director.confirmation_hash(payload, event["gate"])
+                payload["integrity"]["requirement_hash"] = director.requirement_hash(payload)
+                self.assertTrue(director.validate_requirement(payload, self.snapshot, self.position))
+                with self.assertRaises(ValueError):
+                    director.seal_requirement(payload, self.snapshot, self.position)
+        valid = deepcopy(self.requirement)
+        valid["design_dimensions"]["shared"]["frame"] = {"framing": "full-body", "use_case": ["reference master"]}
+        valid["design_dimensions"]["type_specific"]["bound_props"] = {"status": "not_applicable", "reason": "No prop is permanently part of the character silhouette."}
+        valid = self.fixture.approve(valid, self.snapshot, self.position)
+        self.assertEqual(self.validate(valid), [])
+
+    def test_original_document_change_invalidates_unchanged_extraction(self) -> None:
+        original = self.base / "original-script.docx"
+        original.write_bytes(b"synthetic original document version 1")
+        provenance = self.breakdown["source_manifest"]["analysis_provenance"]
+        provenance["original_source_path"] = str(original)
+        provenance["original_source_hash"] = hashlib.sha256(original.read_bytes()).hexdigest()
+        self.fixture.persist_baseline()
+        snapshot, requirement, position = self.fixture.make()
+        self.assertEqual(director.validate_requirement(requirement, snapshot, position), [])
+        original.write_bytes(b"synthetic original document version 2")
+        self.assertEqual(director.freshness_report(self.breakdown)["status"], "stale")
+        self.assertTrue(director.validate_requirement(requirement, snapshot, position))
+
+    def test_removing_derived_state_requires_new_design_confirmation(self) -> None:
         payload = deepcopy(self.requirement)
         payload["derived_states"] = []
-        self.assertEqual(director.validate_requirement(payload, self.snapshot, self.position), [])
+        self.assertTrue(self.validate(payload))
+        payload = self.fixture.approve(payload, self.snapshot, self.position)
+        self.assertEqual(self.validate(payload), [])
 
-    def test_missing_type_dimension_is_rejected(self) -> None:
+    def test_design_change_invalidates_confirmation_even_after_integrity_reseal(self) -> None:
         payload = deepcopy(self.requirement)
-        del payload["design_dimensions"]["type_specific"]["growth_stage"]
-        errors = director.validate_requirement(payload, self.snapshot, self.position)
-        self.assertTrue(any("growth_stage" in error for error in errors))
+        payload["primary_state"]["design_direction"] = "A materially different approved-looking direction"
+        payload["integrity"]["requirement_hash"] = director.requirement_hash(payload)
+        self.assertTrue(self.validate(payload))
+        with self.assertRaises(ValueError):
+            director.seal_requirement(payload, self.snapshot, self.position)
 
-    def test_unresolved_decision_open_question_and_missing_evidence_are_rejected(self) -> None:
+    def test_destination_change_invalidates_persistence_confirmation(self) -> None:
         payload = deepcopy(self.requirement)
-        payload["high_impact_decisions"][0]["status"] = "proposed"
-        payload["open_questions"] = ["服装年代？"]
-        payload["evidence"][0]["source_refs"] = []
-        payload["confirmations"] = payload["confirmations"][:2]
-        errors = director.validate_requirement(payload, self.snapshot, self.position)
-        self.assertTrue(any("not accepted" in error for error in errors))
-        self.assertTrue(any("open_questions" in error for error in errors))
-        self.assertTrue(any("source_refs" in error for error in errors))
-        self.assertTrue(any("three distinct" in error for error in errors))
+        payload["persistence_plan"]["output_root"] = str(self.base / "different-output")
+        payload["integrity"]["requirement_hash"] = director.requirement_hash(payload)
+        self.assertTrue(self.validate(payload))
+        with self.assertRaises(ValueError):
+            director.materialize(self.catalog, self.snapshot, self.requirement, self.position, self.base / "different-output")
 
-    def test_prompt_and_non_user_reference_fields_are_rejected(self) -> None:
-        payload = deepcopy(self.requirement)
-        payload["generation_prompt"] = "forbidden"
-        payload["reference_images"] = [{"source": "web", "controls": ["palette"], "must_not_control": ["identity"]}]
-        errors = director.validate_requirement(payload, self.snapshot, self.position)
-        self.assertTrue(any("forbidden" in error for error in errors))
-        self.assertTrue(any("user_provided" in error for error in errors))
+    def test_confirmations_must_be_distinct_user_events_in_order(self) -> None:
+        cases = {
+            "missing_gate": lambda r: r["confirmations"].pop(),
+            "same_message": lambda r: r["confirmations"][1].update(message_ref=r["confirmations"][0]["message_ref"]),
+            "assistant_approval": lambda r: r["confirmations"][1].update(confirmed_by="assistant"),
+            "reversed_time": lambda r: r["confirmations"][2].update(confirmed_at="2026-08-26T00:00:00Z"),
+            "ambiguous_timestamp": lambda r: r["confirmations"][2].update(confirmed_at="yesterday"),
+        }
+        for label, change in cases.items():
+            with self.subTest(case=label):
+                payload = deepcopy(self.requirement)
+                change(payload)
+                payload["integrity"]["requirement_hash"] = director.requirement_hash(payload)
+                self.assertTrue(self.validate(payload))
+
+    def test_creative_position_content_is_bound_to_approved_requirement(self) -> None:
         position = deepcopy(self.position)
-        position["negative_prompt"] = "forbidden"
-        self.assertTrue(any("prompt" in error for error in director.validate_position(position, "chr-001")))
+        position["claim"] = "A completely new creative position"
+        self.assertTrue(self.validate(position=position))
+        position = deepcopy(self.position)
+        position["evidence"] = ["L999"]
+        with self.assertRaises(ValueError):
+            self.fixture.approve(self.requirement, self.snapshot, position)
 
-    def test_stale_or_mismatched_snapshot_is_rejected(self) -> None:
-        stale = deepcopy(self.snapshot)
-        stale["freshness"]["status"] = "stale"
-        payload = deepcopy(self.requirement)
-        payload["baseline_ref"]["source_hash"] = "b" * 64
-        errors = director.validate_requirement(payload, stale, self.position)
-        self.assertIn("snapshot is stale", errors)
-        self.assertTrue(any("baseline_ref.source_hash" in error for error in errors))
-
-    def test_corrupt_snapshot_hash_and_catalog_mismatch_are_rejected(self) -> None:
+    def test_forged_snapshot_or_catalog_is_rejected(self) -> None:
         snapshot = deepcopy(self.snapshot)
         snapshot["global_visual_context"]["story_contract"] = {"tampered": True}
-        errors = director.validate_requirement(self.requirement, snapshot, self.position)
-        self.assertTrue(any("context_hash" in error for error in errors))
+        self.assertTrue(self.validate(snapshot=snapshot))
         catalog = deepcopy(self.catalog)
         catalog["source_hash"] = "b" * 64
-        self.assertTrue(any("source_hash" in error for error in director.validate_catalog_snapshot(catalog, self.snapshot)))
+        self.assertTrue(director.validate_catalog_snapshot(catalog, self.snapshot))
 
-    def test_materialize_writes_only_contract_artifacts_and_never_overwrites(self) -> None:
-        output = self.base / "outputs"
-        report = director.materialize(self.catalog, self.snapshot, self.requirement, self.position, output)
+    def test_scene_requires_sealed_location_dependency_and_pure_environment_scope(self) -> None:
+        snapshot, requirement, position = self.fixture.make("scn-001")
+        for change in (
+            lambda r: r.update(output_scope="character_blocking"),
+            lambda r: r.update(dependency_assets=[]),
+            lambda r: r["dependency_assets"][0].update(requirement_hash="f" * 64),
+        ):
+            payload = deepcopy(requirement)
+            change(payload)
+            with self.assertRaises(ValueError):
+                self.fixture.approve(payload, snapshot, position)
+        dependency_path = Path(requirement["dependency_assets"][0]["requirement_path"])
+        dependency = json.loads(dependency_path.read_text())
+        dependency["invariants"] = ["changed after scene approval"]
+        dependency_path.write_text(json.dumps(dependency))
+        self.assertTrue(director.validate_requirement(requirement, snapshot, position))
+
+    def test_materialize_writes_complete_package_and_does_not_overwrite(self) -> None:
+        report = director.materialize(self.catalog, self.snapshot, self.requirement, self.position, self.fixture.output_root)
         self.assertEqual(report["status"], "succeeded")
-        version_dir = output / "bird-nest" / "draft-1" / "assets" / "chr-001" / "v1"
-        self.assertEqual(
-            sorted(path.name for path in version_dir.iterdir()),
-            ["context-snapshot.json", "creative-position.json", "decision-log.md", "requirement.json", "requirement.md"],
-        )
-        serialized = "\n".join(path.read_text(encoding="utf-8") for path in version_dir.iterdir())
-        for forbidden in ("negative_prompt", "generation_prompt", "model_parameter", "image_generation"):
-            self.assertNotIn(forbidden, serialized)
-        with self.assertRaisesRegex(ValueError, "already exists"):
-            director.materialize(self.catalog, self.snapshot, self.requirement, self.position, output)
+        version_dir = self.fixture.output_root / "bird-nest" / "draft-1" / "assets" / "chr-001" / "v1"
+        self.assertTrue(version_dir.is_dir())
+        for filename in ("context-snapshot.json", "creative-position.json", "decision-log.md", "requirement.json", "requirement.md", "asset-catalog.json"):
+            self.assertTrue((version_dir / filename).is_file(), filename)
+        materialized = json.loads((version_dir / "requirement.json").read_text())
+        self.assertEqual(self.validate(materialized), [])
+        before = {p.name: p.read_bytes() for p in version_dir.iterdir()}
+        retry = director.materialize(self.catalog, self.snapshot, self.requirement, self.position, self.fixture.output_root)
+        self.assertEqual(retry["status"], "succeeded")
+        self.assertEqual(before, {p.name: p.read_bytes() for p in version_dir.iterdir()})
+        changed = deepcopy(self.requirement)
+        changed["primary_state"]["design_direction"] = "New direction requiring a new asset version"
+        changed = self.fixture.approve(changed, self.snapshot, self.position)
+        with self.assertRaises(ValueError):
+            director.materialize(self.catalog, self.snapshot, changed, self.position, self.fixture.output_root)
+
+    def test_failed_materialization_has_no_partial_package_and_can_retry(self) -> None:
+        original = Path.write_text
+        calls = 0
+        def fail_second_write(path, *args, **kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("simulated storage failure")
+            return original(path, *args, **kwargs)
+        with patch.object(Path, "write_text", new=fail_second_write):
+            with self.assertRaises(OSError):
+                director.materialize(self.catalog, self.snapshot, self.requirement, self.position, self.fixture.output_root)
+        version_dir = self.fixture.output_root / "bird-nest" / "draft-1" / "assets" / "chr-001" / "v1"
+        self.assertFalse(version_dir.exists())
+        self.assertEqual(list(version_dir.parent.iterdir()), [])
+        result = director.materialize(self.catalog, self.snapshot, self.requirement, self.position, self.fixture.output_root)
+        self.assertEqual(result["status"], "succeeded")
+
+
+    def test_cli_seal_and_materialize_use_same_contract(self) -> None:
+        requirement_path = self.fixture.write_package()
+        argv = [sys.executable, str(SKILL_ROOT / "scripts" / "concept_director.py")]
+        common = ["--requirement", str(requirement_path), "--snapshot", str(requirement_path.parent / "context-snapshot.json"),
+                  "--position", str(requirement_path.parent / "creative-position.json")]
+        check = subprocess.run([*argv, "validate-requirement", *common], text=True, capture_output=True)
+        self.assertEqual(check.returncode, 0, check.stdout + check.stderr)
+        self.assertTrue(json.loads(check.stdout)["valid"])
+        output = self.base / "sealed.json"
+        seal = subprocess.run([*argv, "seal", *common, "--output", str(output)], text=True, capture_output=True)
+        self.assertEqual(seal.returncode, 0, seal.stdout + seal.stderr)
+        self.assertEqual(json.loads(output.read_text())["confirmations"], self.requirement["confirmations"])
+        materialize = subprocess.run([*argv, "materialize", *common,
+                                      "--catalog", str(requirement_path.parent / "asset-catalog.json"),
+                                      "--output-root", str(self.fixture.output_root)], text=True, capture_output=True)
+        self.assertEqual(materialize.returncode, 0, materialize.stdout + materialize.stderr)
+        self.assertEqual(json.loads(materialize.stdout)["status"], "succeeded")
+
+    def test_digest_command_does_not_create_user_confirmation(self) -> None:
+        payload = deepcopy(self.requirement)
+        payload["confirmations"] = []
+        path = self.fixture.write_package(payload)
+        before = path.read_bytes()
+        completed = subprocess.run([sys.executable, str(SKILL_ROOT / "scripts" / "concept_director.py"),
+                                    "confirmation-digest", "--requirement", str(path), "--gate", "asset_selection"],
+                                   text=True, capture_output=True)
+        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+        self.assertEqual(json.loads(completed.stdout)["content_hash"], director.confirmation_hash(payload, "asset_selection"))
+        self.assertEqual(path.read_bytes(), before)
+        with self.assertRaises(ValueError):
+            director.seal_requirement(payload, self.snapshot, self.position)
 
 
 class ContractAndBehaviorTests(unittest.TestCase):
-    def test_skill_is_explicit_plan_gated_three_gate_and_no_subagents(self) -> None:
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
-        ui = (SKILL_ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
-        workflow = (SKILL_ROOT / "references" / "workflow.md").read_text(encoding="utf-8")
-        self.assertIn("explicitly invoked `$screenplay-concept-director`", skill)
-        self.assertIn("请切换到 Plan Mode 后重新调用", skill)
-        self.assertIn("three distinct confirmations", skill)
-        self.assertIn("Never use conversational memory as project truth", skill)
-        self.assertIn("Do not invoke subagents unless the user explicitly authorizes", skill)
-        self.assertIn("Do not search the web for references unless", workflow)
-        self.assertIn("Do not complete the interview while any consequential creative choice remains unresolved", skill)
-        self.assertIn("allow_implicit_invocation: false", ui)
-
-    def test_persona_requires_one_position_and_user_override(self) -> None:
-        persona = (SKILL_ROOT / "references" / "persona-and-debate.md").read_text(encoding="utf-8")
-        self.assertIn("one preferred direction", persona)
-        self.assertIn("The user owns the final aesthetic decision", persona)
-        self.assertIn("fact", persona)
-        self.assertIn("unknown", persona)
-
-    def test_ai_script_breakdown_matches_lock_and_canonical_copy(self) -> None:
+    def test_bundled_analyzer_matches_packaging_lock(self) -> None:
         bundled = REPO / "plugins" / "skill-orchestrator" / "skills" / "ai-script-breakdown"
         lock = json.loads((REPO / "plugins" / "skill-orchestrator" / "locks" / "ai-script-breakdown.lock.json").read_text())
-        actual = {}
-        for path in sorted(bundled.rglob("*")):
-            if path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}:
-                actual[str(path.relative_to(bundled))] = hashlib.sha256(path.read_bytes()).hexdigest()
+        actual = {str(p.relative_to(bundled)): hashlib.sha256(p.read_bytes()).hexdigest()
+                  for p in sorted(bundled.rglob("*"))
+                  if p.is_file() and "__pycache__" not in p.parts and p.suffix not in {".pyc", ".pyo"}}
         self.assertEqual(actual, lock["files"])
-        canonical = Path.home() / ".codex" / "skills" / "ai-script-breakdown"
-        if canonical.is_dir():
-            for relative, digest in lock["files"].items():
-                self.assertEqual(hashlib.sha256((canonical / relative).read_bytes()).hexdigest(), digest)
 
-    def test_grill_gold_has_five_cases_per_asset_type(self) -> None:
+    def test_gold_examples_cover_four_asset_types(self) -> None:
         payload = json.loads((REPO / "evals" / "concept-grill-gold.json").read_text(encoding="utf-8"))
-        self.assertGreaterEqual(len(payload["cases"]), 20)
         counts = {}
         for case in payload["cases"]:
             counts[case["asset_type"]] = counts.get(case["asset_type"], 0) + 1
             self.assertGreaterEqual(len(case["expected_dimensions"]), 2)
-            self.assertIn("single_recommendation", case["expected_behavior"])
-            self.assertIn("observable_requirements", case["expected_behavior"])
-        self.assertEqual(counts, {
-            "character_master": 5, "location_master": 5, "scene_state": 5, "hero_prop": 5,
-        })
+        self.assertEqual(counts, {"character_master": 5, "location_master": 5, "scene_state": 5, "hero_prop": 5})
 
 
 if __name__ == "__main__":

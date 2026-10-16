@@ -123,6 +123,20 @@ class IndexTests(unittest.TestCase):
         self.assertIn("visual_asset_requirement_v1", prompt_team["inputs"])
         self.assertIn("visual_prompt_spec_v1", prompt_team["outputs"])
         self.assertIn("image_prompt_package_v2", prompt_team["outputs"])
+        seedance = orchestrator.infer_enrichment(
+            {"name": "seedance-shot-prompt-compiler", "description": "Compile sealed shots into Seedance prompts"},
+            "# Workflow\nConsume a sealed scene direction package.",
+        )
+        self.assertIn("scene_direction_package_v1", seedance["inputs"])
+        self.assertIn("seedance_shot_prompt_record_v1", seedance["outputs"])
+        prose = orchestrator.infer_enrichment(
+            {"name": "screenplay-shot-prose-compiler", "description": "Compile sealed shots into one-shot-per-paragraph DOCX prose"},
+            "# Workflow\nConsume a sealed scene direction package.",
+        )
+        self.assertIn("scene_direction_package_v1", prose["inputs"])
+        self.assertIn("shot_prose_record_collection_v1", prose["outputs"])
+        self.assertIn("document", prose["outputs"])
+
 
 
 class RetrievalTests(unittest.IsolatedAsyncioTestCase):

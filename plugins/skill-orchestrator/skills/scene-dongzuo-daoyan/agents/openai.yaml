@@ -1,0 +1,4 @@
+interface:
+  display_name: "动作导演"
+  short_description: "规划复杂动作、身体接触、安全与状态链"
+policy: {allow_implicit_invocation: false}

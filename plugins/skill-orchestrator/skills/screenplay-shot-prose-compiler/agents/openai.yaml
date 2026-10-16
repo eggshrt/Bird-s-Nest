@@ -1,0 +1,6 @@
+interface:
+  display_name: "分镜正文编译器"
+  short_description: "把封存导演镜头编译成一镜一段的中文分镜正文与无表格 Word 文档"
+  default_prompt: "使用 $screenplay-shot-prose-compiler 将封存导演包编译为一镜一段的中文 DOCX。"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,4 @@
+interface:
+  display_name: "声音导演"
+  short_description: "设计对白、环境声、声音桥、画外音与静默"
+policy: {allow_implicit_invocation: false}

@@ -48,6 +48,33 @@ BUILTIN_SEMANTIC_TYPES = {
             "creative_position_v1",
         ],
     },
+    "screenplay-scene-daoyanzu": {
+        "inputs": ["screenplay_breakdown_v1"],
+        "outputs": ["scene_direction_requirement_v1", "scene_direction_package_v1", "document", "spreadsheet"],
+    },
+    "screenplay-shot-prose-compiler": {
+        "inputs": ["scene_direction_package_v1"],
+        "outputs": ["shot_prose_record_collection_v1", "document"],
+    },
+    "director-knowledge-manager": {
+        "inputs": ["html", "markdown"],
+        "outputs": ["director_knowledge_catalog_v1", "director_role_catalog_v1"],
+    },
+    "seedance-shot-prompt-compiler": {
+        "inputs": ["scene_direction_package_v1", "spreadsheet"],
+        "outputs": ["seedance_shot_prompt_record_v1", "spreadsheet"],
+    },
+    "scene-zongdaoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-biaoyan-diaodu-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-sheying-fenjing-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-lianxuxing-zhixing-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-dongzuo-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-taici-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-dengguang-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-tiaose-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-shengyin-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-texiao-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
+    "scene-chuangyi-daoyan": {"inputs": ["agent_task_v1", "scene_direction_requirement_v1"], "outputs": ["agent_result_v1", "director_position_v1"]},
     "image-prompt-team": {
         "inputs": ["visual_asset_requirement_v1"],
         "outputs": ["visual_prompt_spec_v1", "image_prompt_package_v2", "run_report_v2"],

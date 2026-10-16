@@ -18,6 +18,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from analysis_provenance import capture
+
 
 SUPPORTED_FORMATS = {"text", "txt", "markdown", "fountain", "fdx"}
 ROUTED_FORMATS = {"pdf", "docx"}
@@ -431,6 +434,8 @@ def normalize_screenplay(
     draft_id: str,
     filename: str | None = None,
     title: str | None = None,
+    source_path: str | None = None,
+    original_source_path: str | None = None,
 ) -> dict[str, Any]:
     text = normalize_text(source_text)
     if not text.strip():
@@ -457,6 +462,7 @@ def normalize_screenplay(
         "reference_scheme": "line" if ref_prefix == "L" else "fdx_paragraph",
         "warnings": warnings,
     }
+    manifest["analysis_provenance"] = capture(manifest["sha256"], source_path, original_source_path)
     characters = entity_records(scenes, "characters")
     locations = entity_records(scenes, "locations")
     return {
@@ -495,6 +501,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--draft-id", required=True)
     parser.add_argument("--title")
     parser.add_argument("--output", help="Write JSON to this path; default is stdout")
+    parser.add_argument('--original-source', help='Original PDF/DOCX file when source is a persisted layout-aware extraction')
     return parser
 
 
@@ -503,7 +510,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         fmt = detect_format(args.source, args.format)
         raw_text, filename = read_source(args.source)
-        result = normalize_screenplay(raw_text, fmt, args.source_id, args.draft_id, filename, args.title)
+        result = normalize_screenplay(raw_text, fmt, args.source_id, args.draft_id, filename, args.title,
+                                      args.source if args.source != "-" else None, args.original_source)
         write_json(result, args.output)
     except RoutedFormatError as exc:
         print(f"ROUTE_REQUIRED: {exc}", file=sys.stderr)

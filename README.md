@@ -1,229 +1,286 @@
 # Bird's Nest · Skill Orchestrator
 
-**把整本剧本收束成一个可审查、可追溯、可直接生成的视觉资产。**
+**把剧本逐步变成可审阅的场景导演方案、一镜一段的中文分镜 Word，以及按需制作的视觉资产概念和生成提示词。**
 
-Bird's Nest（插件名 `skill-orchestrator`）是一个面向 Codex 的开源视觉开发编排系统。它读取剧本与用户参考图，把口述审美逐步对齐为可定位的剧本证据、严格单资产概念契约和结构化视觉规格，再让独立专家通过可恢复 DAG 审查冲突，最终交付唯一一条 OpenAI-first 中文母提示词。
+Bird's Nest 是运行在 Codex 中的开源插件，插件名为 `skill-orchestrator`。它把剧本分析、导演、摄影、表演、连续性和视觉设计分给不同岗位，再把有依据的建议交给你决定。你不需要自己安排所有岗位，也不需要手写中间的 JSON 文件。
 
-它适合短剧、电影、广告和虚拟制片的前期视觉开发：人物母版、纯环境地点、具体场景状态和核心道具都能进入同一套三道确认门。它不会在需求尚未封版时偷跑出图，也不会把多个角色、多个场景或未经确认的风格偏好塞进同一条提示词。
+当前版本为 **0.8.0**，共有 **38 个 Skills：9 个用户入口、18 个视觉内部岗位、11 个场景导演内部岗位**。其中一个视觉岗位仅保留旧格式兼容，不参与新流程。
 
-```text
-口述需求 → Grill 对齐 → 全剧分析 → 单资产封版
-        → 独立专家立场 → VisualPromptSpecV1 → 一条 OpenAI 母提示词
-```
+[0.8 发布说明](docs/release-v0.8.0.md) · [从旧版升级](docs/migration-v0.8.md) · [质量与验证范围](docs/quality-status.md)
 
-它优先解决四个常见问题：需求还没说清就开始生成、不同专家互相覆盖、提示词堆砌却没有视觉中心、失败后无法知道哪条决定导致漂移。
+## 你能得到什么
 
-## 项目隐私边界
+| 你要完成的事 | 主要交付物 |
+| --- | --- |
+| 看清剧本的结构、人物、场景和 AI 制作难点 | 中文剧本拆解报告，以及后续流程使用的证据数据 |
+| 把选定场景变成具体拍法 | 场景意图、表演走位、摄影分镜、连续性和执行风险；默认交付**一镜一段的中文 Word** |
+| 定义一个人物、地点、环境状态或核心道具 | 一份中文 **`资产概念设计书.md`** |
+| 为已定案的单个视觉资产写图像提示词 | 经视觉岗位审查的一条**中文 OpenAI 图像母提示词**，以及视觉规格和决定记录 |
+| 为已定案镜头写 Seedance 视频提示词 | 按你提供的中文镜头表模板生成的**逐镜提示词 Excel** |
 
-公开仓库只包含通用 Skills、运行时、schemas、合成测试和方法文档，不收录任何用户剧本、参考图、资产目录、概念契约、生成提示词、运行报告或项目案例。所有项目产物默认写入仓库外的任务目录；仓库根目录的 `/outputs/` 也被 Git 忽略。
+插件负责分析、设计和文字交付，**正常流程不会直接生成图片或视频**。图像提示词和 Seedance 提示词是两个独立分支，需要分别明确调用。
 
-## 为什么它不只是“提示词模板”
+## 先看懂三条路线
 
-- **证据先于修辞**：剧本事实、保守推导、创意决定和审美偏好分别记录。
-- **一个资产，一条主线**：每次只处理一个人物母版、纯环境资产或核心道具。
-- **专家先独立判断**：视觉简报、层级、设计语言、母题、色光、镜头与类型专家各自产生可反驳立场。
-- **冲突不靠投票**：按剧本、有效基线、封版契约和 Agent 推导的证据权级裁决。
-- **确认门真实存在**：执行前、视觉规格后、正式落盘前三次确认；任何一门都不能由总确认替代。
-- **中断可恢复**：SQLite 追加事件日志、线程 ID、租约和图版本支持单机进程级恢复。
-- **边界默认收紧**：不联网找图、不安装外部 Skill、不生成图像、不输出模型参数或独立负面词。
+### 路线 A：剧本 → 场景导演 → 分镜 Word
 
-## v0.4 工作流
-
-### 1. 从剧本到单资产契约
-
-在 Plan Mode 中显式调用概念导演：
+这是 0.8 的默认场景导演路线：
 
 ```text
-$screenplay-concept-director 请基于我上传的剧本建立基线，并和我一起只封版一个视觉资产。
+上传剧本
+  ↓ ai-script-breakdown
+完成拆解并校验，建立可追溯的剧本基线
+  ↓ screenplay-scene-daoyanzu
+选择同一剧本的 1–2 场 → 确认需求 → 导演岗位提案 → 确认方案
+  ↓
+封存场景导演包
+  ↓ screenplay-shot-prose-compiler
+首次使用先看代表镜头校样 → 确认 → 一镜一段的中文 DOCX
 ```
 
-它复用 `$ai-script-breakdown` 的全剧证据和 `$grill-me` 的对齐协议，生成严格单资产、开放问题为空的 `VisualAssetRequirementV1`。这一阶段只定义设计，不生成提示词或图像。
+Word 中包含场次标题、一段导演基线和逐镜正文。每个镜头按发生顺序写清景别、空间关系、动作、表演、对白、变化的声音和结束状态。它不是表格，也不是发给视频模型的提示词。
 
-### 2. 从契约到视觉规格
-
-切回普通执行模式：
+### 路线 B：剧本 → 单资产概念 → 图像提示词
 
 ```text
-$image-prompt-team 请读取刚刚封版的单资产需求，推荐用途、景别和画幅，并在每一道确认门停下来等我。
+已完成的剧本基线
+  ↓ screenplay-concept-director
+只选一个人物／地点／环境状态／核心道具 → 确认设计 → 资产概念设计书
+  ↓ image-prompt-team（你明确要求时）
+视觉岗位审查 → 确认视觉规格 → 确认一条中文 OpenAI 图像母提示词
 ```
 
-第一次确认会展示资产、用途、画幅、预计 12–15 个 Agent turn、峰值并发 3、权限与 Codex 用量。随后运行：
+“单资产”就是一次只设计一个稳定主体，例如某个人物的标准形象，或者一个不含人物的庭院。地点和场景状态进入图像提示词团队时必须是**纯环境**；人物入场、互动和走位应走路线 A。核心道具已实现，但仍属于实验能力。
 
-- 一个证据守门员；
-- 六个固定创意专家；
-- 一个匹配资产类型的专家；
-- 规格装配、制作审查、对抗审查和证据裁决；
-- 用户上传参考图时，额外运行参考职责导演。
+### 路线 C：已封存镜头 → Seedance 提示词 Excel
 
-团队先输出 `VisualPromptSpecV1`，其中包含交付基调、唯一视觉中心、设计语言、有限母题、色光逻辑、构图、类型专项清单、可见性矩阵、冲突与裁决。第二次确认前不会编译最终提示词。
+```text
+路线 A 的封存导演包 + 你提供的中文镜头表 XLSX 模板
+  ↓ seedance-shot-prompt-compiler（你明确要求时）
+代表镜头提示词校样 → 确认 → 完整中文 Seedance 2.0 文生视频提示词 XLSX
+```
 
-### 3. 从规格到唯一母提示词
+这一分支不会自动加入默认导演流程，也不会替你生成视频。当前只处理 **Seedance 2.0 文生视频（T2V）**；图生视频、参考生视频和模型调用参数不在该流程内。校样尚未确认时，未编译镜头的提示词格保持空白。
 
-规格确认后，DAG 只增量加入显著性编辑和 OpenAI 编译两个节点。最终提示词遵循 [OpenAI GPT Image prompting guide](https://developers.openai.com/cookbook/examples/multimodal/image-gen-models-prompting-guide) 的稳定语义顺序：场景或背景、主体、关键可见细节、构图与光线、少量不变量。
+## 我应该调用哪个入口
 
-提示词使用无标题短段落，不设机械字符上限。每句话必须改变可见结果或保护确认过的不变量。第三次确认后才正式写入文件。
+普通使用只需记住与你当前目标对应的入口，内部岗位由插件安排。
 
-## 安装
+| 我现在想做什么 | 调用哪个 Skill | 先准备什么 |
+| --- | --- | --- |
+| 从原始剧本开始 | `$ai-script-breakdown` | 剧本原文件；第一次先切到计划模式 |
+| 给某一两场设计拍法 | `$screenplay-scene-daoyanzu` | 已完成校验的剧本拆解、目标场次和制作约束 |
+| 把定案镜头整理成 Word | `$screenplay-shot-prose-compiler` | 已封存的场景导演包；默认导演流程会接入它 |
+| 做一个人物、环境或道具的概念设计 | `$screenplay-concept-director` | 完整剧本基线、一个目标资产、你的偏好和可选参考图 |
+| 写图像提示词 | `$image-prompt-team` | 已封存的单资产概念需求及配套内部文件 |
+| 写 Seedance 镜头提示词 | `$seedance-shot-prompt-compiler` | 已封存导演包和中文镜头表 XLSX 模板 |
+| 想法还不清楚，先一起推敲 | `$grill-me` | 想法、计划或需要做的决定 |
+| 让插件选择本地 Skills 并安排任务 | `$skill-orchestrator` | 目标、输入材料、约束和验收要求 |
+| 整理供导演岗位使用的知识资料 | `$director-knowledge-manager` | HTML／Markdown 资料；发布前由你审定 |
+
+## 安装与更新
+
+在可使用 Codex CLI 的终端中执行：
 
 ```bash
 codex plugin marketplace add eggshrt/Bird-s-Nest
 codex plugin add skill-orchestrator@skill-orchestrator-private
+codex plugin list
 ```
 
-安装或更新后，新建一个 Codex 任务以重新发现 Skills。
-
-如果你希望直接把一段指令发给 Codex，让它替你从 GitHub 下载、安装并验证，请复制[让 Codex 自动安装的中文文案](docs/install-with-codex.zh-CN.md)。
-
-安装完成后，可在新任务中这样开始：
-
-```text
-$screenplay-concept-director 我会上传一份剧本和参考图。请先建立或复用全剧基线，只选择一个视觉资产，在每一道确认门停下来等我，不要生成图像。
-```
-
-`$image-prompt-team` 运行前要求当前任务处于 `danger-full-access`。插件不会修改用户配置；该宿主权限也不代表已授权发布、付费、破坏性操作或外部写入。
-
-## 正式产物
-
-```text
-outputs/image-prompt-team/<project>/<draft>/assets/<asset-id>/<version>/
-├── generation-prompt.txt
-├── visual-prompt-spec.json
-├── prompt-package.json
-├── decision-log.md
-└── run-report.json
-```
-
-上游概念设计阐述不被重写，而是按哈希引用。旧 `ImagePromptPackageV1` 只读/导出；v0.4 新运行只写 `VisualPromptSpecV1` 和 `ImagePromptPackageV2`，不双写。
-
-项目审计位于 `.codex/skill-orchestrator/`，默认不提交 Git。事件永久保留，只有显式 `prune` 才删除。
-
-## 能力谱系：23 个 Skills
-
-Bird's Nest 不是把 23 个 Skills 平铺成一个工具箱，而是让证据沿着一条受控生产链逐层收束：
-
-```text
-口述想法 / 剧本
-│
-├─ 需求对齐
-│  └─ grill-me
-│
-├─ 全剧事实基线
-│  └─ ai-script-breakdown
-│
-├─ 单资产概念封版
-│  └─ screenplay-concept-director
-│     ├─ 人物母版
-│     ├─ 地点母版
-│     ├─ 具体场景状态
-│     └─ 核心道具
-│
-└─ 单资产图像提示词生产
-   └─ image-prompt-team
-      │
-      ├─ 证据与边界
-      │  └─ evidence-guardian
-      │
-      ├─ 资产专项专家（三选一）
-      │  ├─ character-asset-designer
-      │  ├─ environment-asset-designer
-      │  └─ prop-asset-designer
-      │
-      ├─ 六位固定视觉导演
-      │  ├─ visual-brief-director
-      │  ├─ visual-hierarchy-director
-      │  ├─ design-language-director
-      │  ├─ motif-curator
-      │  ├─ color-light-director
-      │  └─ camera-composition-director
-      │
-      ├─ 用户提供参考图时
-      │  └─ reference-role-director
-      │
-      ├─ 汇总与质检
-      │  ├─ visual-spec-assembler
-      │  ├─ visual-production-critic
-      │  ├─ adversarial-reviewer
-      │  └─ synthesis-adjudicator
-      │
-      └─ 提示词输出
-         ├─ prompt-salience-editor
-         └─ openai-image-prompt-compiler
-```
-
-### 五个用户入口
-
-| Skill | 职责 | 核心产出 |
-| --- | --- | --- |
-| `$grill-me` | 暴露假设、偏好、风险和共同未知 | 关闭设计树后的共同理解 |
-| `$ai-script-breakdown` | 完整分析剧本并建立可追溯事实基线 | `screenplay_breakdown_v1` |
-| `$screenplay-concept-director` | 为一个人物、地点、场景状态或道具完成概念封版 | `VisualAssetRequirementV1` |
-| `$image-prompt-team` | 通过可恢复专家 DAG 形成视觉规格和唯一母提示词 | `VisualPromptSpecV1`、`ImagePromptPackageV2` |
-| `$skill-orchestrator` | 通用需求对齐、Skill 检索、类型绑定和运行恢复 | `RequirementContractV2`、`RunReportV2` |
-
-其余 18 个 Skills 是内部角色。它们只接受调度器签名的 `AgentTaskV1`，直接调用会停止并指向 `$image-prompt-team`；这能避免专家绕过单资产边界、确认门和审计记录。`$prompt-architect` 仅用于读取旧 v0.3 运行，不进入 v0.4 新 DAG。
-
-### 数据如何逐层继承
-
-```text
-剧本原文
-  ↓
-screenplay_breakdown_v1
-全剧事实、人物、世界观、文化和制作基线
-  ↓
-AssetCatalogV1 + AssetContextSnapshotV1
-稳定资产 ID、相关证据和受限上下文
-  ↓
-VisualAssetRequirementV1
-经用户封版的单资产概念需求
-  ↓
-VisualPromptSpecV1
-经多专家审查和证据裁决的可观察视觉规格
-  ↓
-ImagePromptPackageV2
-中文设计阐述、唯一 OpenAI 母提示词和折叠审计引用
-```
-
-每一层只能具象化和压缩已经确认的上游信息。剧本事实不能被 Agent 偏好覆盖；高影响设计缺口必须返回概念导演，不能在提示词阶段偷偷补写。
-
-### 当前可用范围
-
-- 人物母版和纯环境资产是当前主能力；核心道具已经实现，但仍标记为实验能力。
-- 地点和场景状态进入提示词团队时必须是纯环境，不得暗中加入第二个角色或资产。
-- 用户参考图可以参与，但每张图只能控制声明过的维度，并同时声明不得控制的维度。
-- v0.4 唯一生产级适配器是 OpenAI 中文主提示词。
-
-当前明确不包含自动图像生成、多资产联合封版、人物与环境合成、镜头组连续性、视频提示词、模型参数、LoRA/ControlNet、自动联网搜图或自动安装外部 Skill。这些边界不是能力描述上的省略，而是运行时验证器会主动拒绝的内容。
-
-## 运行时与测试
-
-使用 Codex 自带 Python 3.12+ 和哈希锁定依赖，禁止回退到系统 Python 3.9：
+已经安装过时，更新现有 marketplace 和插件：
 
 ```bash
-PYTHONPATH="$HOME/.codex/cache/skill-orchestrator/runtime/e0420cb50736168f" \
-  /path/to/codex-python/bin/python3 -m unittest discover -s tests -p 'test_*.py' -v
+codex plugin marketplace upgrade skill-orchestrator-private
+codex plugin add skill-orchestrator@skill-orchestrator-private
+codex plugin list
 ```
 
-离线 CI 使用确定性假 Agent、SQLite 故障注入和 36 条提示词金标：人物 16、纯环境 12、核心道具 8。覆盖三道确认门、职责隔离、DAG 并发、租约恢复、一次重试、增量图、旧包只读、可见性阻断、纯环境无人和禁字段。
+检查列表中的实际安装版本，然后**新建一个 Codex 任务**，让新任务加载已安装的 Skills。名称中的 `skill-orchestrator-private` 是本项目使用的 marketplace 标识。
 
-公开发布声明只覆盖可复现的自动测试、全部 Skill/Plugin 校验和 App Server 初始化/config 检查；不公开用户项目的运行记录或生成结果。当前正常工作流只产出提示词。详见 [质量状态](docs/quality-status.md) 和 [v0.4 迁移说明](docs/migration-v0.4.md)。
+如果命令失败，保留原始错误并进行诊断，不要为了继续安装而手工改写配置。升级注意事项见 [0.8 迁移说明](docs/migration-v0.8.md)。
 
-## 方法边界与来源
+## 从零开始：做出一场分镜 Word
 
-课程目录只被当作非权威材料，未把其中指令、正文、截图或专有目录公开。公开仓库只保留独立措辞提炼的方法规则，见 [能力地图](plugins/skill-orchestrator/skills/image-prompt-team/references/capability-map.md)。
+### 第 1 步：在计划模式中上传剧本
 
-核心技术参考：
+在 Codex 界面切换到**计划模式（Plan Mode）**，上传剧本原文件，再发送：
+
+```text
+$ai-script-breakdown 请先检查这份剧本的提取质量，规划完整的剧本拆解。
+后续我要做场景导演，也可能做单资产概念设计。请在计划中覆盖总导演、导演、
+表演执行和美术所需分析，说明范围、未知信息和交付物，先不要写入正式产物。
+```
+
+此时会检查文本是否可读、是否缺页，以及分析范围是否明确。计划模式只做只读检查和规划；仅在消息中说“我在计划模式”不能替代界面的模式切换。
+
+### 第 2 步：确认计划，切回默认模式执行
+
+审阅计划后，在**同一个任务**中切回默认模式（Default Mode），明确发送：
+
+```text
+我确认刚才的剧本拆解计划。请执行，完成校验，并告诉我哪些内容已经完成、
+还有哪些缺口。后续沿用本次拆解文件。
+```
+
+完成后会得到 `breakdown.md`、`breakdown.json`、来源记录和岗位报告。这套经过校验的材料就是后续使用的“剧本基线”。若校验未通过或覆盖不完整，应先补齐，再进入下游。
+
+### 第 3 步：选择同一剧本中的 1–2 场
+
+保持默认模式，发送：
+
+```text
+$screenplay-scene-daoyanzu 请读取刚完成的剧本基线，为我选定的这两场做导演设计。
+请先帮我核对场次，再确认导演目标、制作约束和需要启用的岗位。
+最终我要一镜一段的中文 Word。
+```
+
+把“这两场”替换成实际场名或场次编号即可。导演组不会直接拿原始剧本跳过拆解；它需要稳定的场景、节拍和原文证据编号。
+
+第一轮会确认目标、约束和岗位。随后总导演、表演调度、摄影分镜、连续性执行四个常驻岗位工作；动作、台词、灯光、调色、声音、特效等岗位按场景需要启用。第二轮集中确认实质争议和整体方案，每轮最多处理三项争议。
+
+### 第 4 步：确认导演方案，再确认正文校样
+
+导演方案确认后，插件先封存导演包，再整理 Word。首次采用正文写法或写法标准变化时，会先提供建立镜、长对白镜、复合调度镜的代表校样。确认校样后才生成全场正文。
+
+Word 只呈现可顺读的场次和镜头文字；证据编号、决定日志和校验信息留在配套 JSON 中。请保留这些内部文件，后续修改或制作 Seedance 提示词需要它们。
+
+### 第 5 步：需要其他交付时，明确开启分支
+
+需要 Seedance 提示词时，提供 Excel 模板并发送：
+
+```text
+$seedance-shot-prompt-compiler 请使用刚封存的导演包和我上传的中文镜头表模板，
+先制作代表镜头的中文 Seedance 2.0 文生视频提示词校样，等我确认后再编译全部镜头。
+```
+
+如果你想先做人物或场景外观，另行调用 `$screenplay-concept-director`，选定一个资产，完成概念设计书后再调用 `$image-prompt-team`。这条路线需要的完整基线必须包含总导演、导演、表演执行、美术报告及共同分析；缺项时由上游补齐。
+
+## 两个词，理解后就容易用了
+
+- **基线**：一份已完成校验、能追溯回原始剧本的共同事实记录。后面的岗位都从它出发，避免各自重新理解或编造剧情。剧本换稿或来源变化后，需要检查并更新受影响部分。
+- **封存／封版**：你已经确认的一版方案被保存，并带有内容校验值。后续工具只能准确表达这版决定，不能自行换对白、改走位或加剧情。实质修改会产生新版本，相关确认也需要更新。
+
+场景导演包决定“拍什么、怎么拍”；正文编译器把它写成易读分镜；Seedance 编译器把它写成模型提示词。两个编译器都没有重新导演的权限。
+
+## 输入文件与输出文件
+
+| 环节 | 实际输入 | 给你看的输出 | 继续下一步时要保留的材料 |
+| --- | --- | --- | --- |
+| 剧本拆解 | 剧本原文／文档、确认过的分析计划 | `breakdown.md`、各岗位报告、跨岗位决定；对比版本时另有改稿影响报告 | `breakdown.json`、来源记录和原始剧本文件 |
+| 场景导演 | 已校验拆解、1–2 个场景、确认过的目标与约束 | 默认是一镜一段的中文 DOCX | 封存的 `scene-direction-package.json` 及正文记录 |
+| 单资产概念 | 完整剧本基线、一个选定资产、偏好与约束 | 一份 `资产概念设计书.md` | 已封存需求、资产目录、上下文快照和创意立场文件 |
+| 图像提示词 | 已封存单资产需求及配套文件；可选用户参考图 | 一条 `generation-prompt.txt` 中文母提示词、已确认视觉规格 | 视觉规格、提示词包、决定日志和运行记录 |
+| Seedance 提示词 | 已封存导演包、中文镜头表 XLSX 模板 | 代表镜头校样／完整提示词 XLSX | 提示词记录及原导演包 |
+| 导演知识管理 | HTML／Markdown 资料、你的审定决定 | 待审资料清单、可追溯的岗位知识包 | 转换后的 Markdown、来源哈希、知识与岗位目录、审定记录 |
+
+你通常不必手动编辑内部文件，但不要只保留 Word 或设计书后就删除它们。换任务继续时，把文件位置交给 Codex；聊天记忆和可读文档不能替代经过校验的输入包。
+
+## 完整 Skill 目录：9 + 18 + 11
+
+内部岗位主要输出供调度器使用的结构化提案、检查结果或规格。它们不是要你逐个输入的命令，也不代表每次会启动全部 38 个岗位。
+
+<details>
+<summary><strong>9 个用户入口：用途、输入和输出</strong></summary>
+
+| Skill | 用途 | 输入 → 输出 |
+| --- | --- | --- |
+| `grill-me` | 一起检验想法，澄清重要决定 | 想法／计划／疑问 → 逐轮问题、建议、待验证假设和经确认的共同理解 |
+| `ai-script-breakdown` | 剧本拆解、AI 可行性和改稿影响分析 | 原始剧本＋确认计划 → 中文报告、岗位报告和结构化剧本基线 |
+| `screenplay-scene-daoyanzu` | 组织场景导演组 | 已验证基线中的 1–2 场＋需求 → 封存导演包，默认接续生成分镜 DOCX |
+| `screenplay-shot-prose-compiler` | 把定案镜头写成中文正文 | 已封存导演包 → 一镜一段的正文记录和无表格 DOCX |
+| `screenplay-concept-director` | 定义一个视觉资产 | 完整基线＋一个人物／地点／环境状态／道具 → 中文资产概念设计书及内部封存需求 |
+| `image-prompt-team` | 组织视觉专家写图像提示词 | 已封存单资产需求 → 已确认视觉规格和一条中文 OpenAI 母提示词 |
+| `seedance-shot-prompt-compiler` | 为定案镜头编译视频提示词 | 已封存导演包＋XLSX 模板 → 中文 Seedance 2.0 T2V 提示词记录和 XLSX |
+| `skill-orchestrator` | 通用任务协调、选择本地 Skills、执行与恢复 | 口述需求／支持的结构化需求 → 确认后的任务约定、执行安排和运行报告 |
+| `director-knowledge-manager` | 整理、审核和发布导演知识 | HTML／Markdown＋用户审定 → 知识目录、岗位映射和已发布知识包 |
+
+</details>
+
+<details>
+<summary><strong>18 个视觉内部岗位：由 image-prompt-team 调度</strong></summary>
+
+这些岗位接收调度器分配的任务，以及当前单资产需求、证据、视觉规格或审查材料。直接调用会引导你回到 `$image-prompt-team`。
+
+| Skill | 中文岗位 | 具体输出 |
+| --- | --- | --- |
+| `evidence-guardian` | 证据守门员 | 核对事实来源、已确认决定、不可改变的特征和单资产边界，列出冲突 |
+| `visual-brief-director` | 视觉简报导演 | 交付物、用途、媒介、基调和判断优先级建议 |
+| `visual-hierarchy-director` | 视觉层级导演 | 唯一视觉中心、注意顺序、空间引导和信息密度建议 |
+| `design-language-director` | 设计语言导演 | 形状、比例、材料、构造、磨损与文化符号的统一规则 |
+| `motif-curator` | 视觉母题策划 | 保留哪些有叙事价值的视觉元素、删掉哪些干扰元素 |
+| `color-light-director` | 色彩与光线导演 | 大色块关系、光源依据、氛围和材质响应建议 |
+| `camera-composition-director` | 镜头与构图导演 | 视角、尺度、透视、遮挡、前后层次和关键特征可见性建议 |
+| `character-asset-designer` | 人物资产设计师 | 轮廓、比例、姿态、脸发、服装、材料历史和已绑定道具的专项检查 |
+| `environment-asset-designer` | 环境资产设计师 | 空间功能、动线、尺度、结构、气候、材料历史和光线的专项检查；保持纯环境 |
+| `prop-asset-designer` | 核心道具设计师 | 归属、用途、操作方式、尺度、机械结构、材料重量、磨损和辨识点建议 |
+| `reference-role-director` | 参考图职责导演 | 为每张用户参考图限定可控制和不可控制的维度；有参考图时才启用 |
+| `visual-spec-assembler` | 视觉规格整合师 | 汇总专家方案，生成含冲突和可见性覆盖检查的视觉规格草案 |
+| `visual-production-critic` | 视觉制作审查员 | 可读性、构图、人体／空间、材质和制作可行性的具体缺陷及修正建议 |
+| `adversarial-reviewer` | 对抗审查员 | 反查虚构事实、矛盾、套路、文化误用、信息过载和混入第二资产等问题 |
+| `synthesis-adjudicator` | 综合裁决员 | 根据证据和已确认决定解决冲突，形成统一规格；无法解决时明确阻断原因 |
+| `prompt-salience-editor` | 提示词重点编辑 | 按可见影响排序、去重、删减，保留必要特征的编译计划 |
+| `openai-image-prompt-compiler` | OpenAI 图像提示词编译器 | 将确认规格编译为一条中文母提示词，不新增设计事实 |
+| `prompt-architect` | 旧提示词架构师 | 读取／解释旧版平台中立提示词草案；**仅兼容旧运行，不进入新流程** |
+
+</details>
+
+<details>
+<summary><strong>11 个场景导演内部岗位：4 个常驻 + 7 个条件岗位</strong></summary>
+
+这些岗位接收场景需求、剧本证据和分配的任务，输出独立导演提案，包含建议、依据、假设、风险和冲突。由 `$screenplay-scene-daoyanzu` 汇总，最终创作决定由你确认。
+
+| Skill | 中文岗位 | 启用方式与具体输出 |
+| --- | --- | --- |
+| `scene-zongdaoyan` | 场景总导演 | **常驻**：核心导演意图、戏剧转折、视点、节奏和跨岗位裁决建议 |
+| `scene-biaoyan-diaodu-daoyan` | 表演调度导演 | **常驻**：人物目标、潜台词、行动、走位、距离、视线、微动作和接触状态链 |
+| `scene-sheying-fenjing-daoyan` | 摄影分镜导演 | **常驻**：机位、景别、焦段倾向、运镜、空间建立、覆盖与剪辑衔接 |
+| `scene-lianxuxing-zhixing-daoyan` | 连续性执行导演 | **常驻**：每镜首尾状态、跨镜连续性、重置点、依赖和现场执行风险 |
+| `scene-dongzuo-daoyan` | 动作导演 | 有追逐、打斗、跌倒、复杂接触等需要时：动作链、拆分与安全备选 |
+| `scene-taici-daoyan` | 台词导演 | 对白、潜台词或口型压力突出时：称谓、信息顺序、呼吸节奏和对白覆盖建议；改词须确认 |
+| `scene-dengguang-daoyan` | 灯光导演 | 光源或曝光连续性复杂时：光源方向、强弱关系、人物可读性与变化节点 |
+| `scene-tiaose-daoyan` | 调色导演 | 色彩转折、跨场匹配或肤色有要求时：色彩状态、肤色保护和匹配方案 |
+| `scene-shengyin-daoyan` | 声音导演 | 有画外音、声音桥、主观声等需要时：声音来源、功能、起止点和关键静默 |
+| `scene-texiao-daoyan` | 特效导演 | 涉及天气、群体、环境或物理效果时：实拍／生成／合成分层、状态、重置与备选 |
+| `scene-chuangyi-daoyan` | 创意导演 | 你明确要求非常规形式时：形式建议、收益、代价和普通方案；优先级低于事实与核心岗位 |
+
+</details>
+
+## 使用边界与常见卡点
+
+- **一次场景导演限同一剧本的 1–2 场。** 导演包保留各场的独立镜头和证据；整部剧本需要分批推进。
+- **一次概念设计限一个资产。** 选择资产、确认设计、确认保存计划是三个独立确认点；图像提示词团队另有执行、规格、最终提示词三个确认点。
+- **原文和已确认决定优先。** 缺失事实会标明未知。对白、剧情、人物关系、接触、核心走位和道具状态不能由后续岗位静默改写。
+- **不接受未封存导演草案直接生成正式正文或视频提示词。** 两个下游编译器会检查封存状态和内容是否一致。
+- **默认导演交付是 DOCX。** 旧版镜头表 XLSX 只在明确要求兼容时生成；Seedance 的 XLSX 是另一项显式功能。
+- **不提供自动出图、自动出视频、分镜图、预算、通告单或完整制片排期。** 图像提示词流程不自动搜参考图、生成独立负面词或模型参数，也不制作多人多资产合成图。
+- **图像提示词团队只在默认模式运行，并要求当前任务具备 `danger-full-access`。** 通用调度器也将其作为宿主前提。插件不会替你修改配置；这项权限不等于授权发布、付费或其他外部操作。
+- **中断恢复有范围。** 通用运行时记录本机任务状态和事件，可做本机进程级恢复；不承诺跨机器高可用或所有失败都能自动恢复。
+- **目录里有 Skill，不等于当前对话已加载。** 安装或更新后先新建任务；输入不满足前置条件时，应补齐上游，而不是绕过校验。
+
+## 项目资料与隐私
+
+公开仓库用于分发通用 Skills、运行时、数据格式、测试和独立措辞整理的方法规则，不包含用户项目案例，也不分发课程原文。**用户剧本、参考图、概念设计、提示词和运行报告不应提交到插件仓库。** 项目交付物应保存在你的任务工作区；仓库根目录的 `/outputs/` 已设置 Git 忽略。
+
+运行记录默认保存在项目的 `.codex/skill-orchestrator/` 中，用于追溯决定和恢复任务，默认不提交 Git。事件不会在运行结束后自动删除，只有显式清理才删除。插件不包含独立遥测后端；在 Codex 中执行时，材料仍会按你所使用的模型与工具的数据处理规则处理。
+
+参考图仅接收用户提供的材料，不自动联网找图。导演知识资料必须经过用户审定才能发布给岗位使用；资料发生变化时，未经审定的新版本不能替换旧的已发布版本。你的知识原文、转换文本和审定记录留在本地，不随插件发布。外部 Skill 只会在能力缺口出现时接受审阅，不自动安装或执行未经审查的脚本。
+
+## 验证范围与方法来源
+
+自动测试和校验主要检查数据格式、证据引用、用户确认、岗位边界、执行恢复和文档生成等机制。它们不能保证图像或视频模型最终遵守每条提示词，也不构成真实项目创作效果的保证。具体范围见[质量状态](docs/quality-status.md)，本次变更与验证记录见 [0.8 发布说明](docs/release-v0.8.0.md)。
+
+方法资料作为研究参考，不具有高于剧本事实或用户决定的权威。公开规则应使用独立措辞，并保留可追溯来源；不复制许可不清的外部代码或长篇正文。视觉方法的采用与边界见[能力地图](plugins/skill-orchestrator/skills/image-prompt-team/references/capability-map.md)。
+
+技术与方法参考：
 
 - [Agent Skills open standard](https://github.com/agentskills/agentskills)
 - [Codex Skills](https://learn.chatgpt.com/docs/build-skills)
 - [Codex App Server](https://developers.openai.com/codex/app-server)
 - [OpenAI GPT Image prompting guide](https://developers.openai.com/cookbook/examples/multimodal/image-gen-models-prompting-guide)
 
-外部仓库只在能力缺口出现时审阅。候选必须展示许可证、维护状态、脚本、权限和副作用；不自动安装。无许可证项目只允许抽象能力启发和独立实现，不复制代码或文字。
+外部候选能力需要核对许可证、维护状态、脚本、权限和副作用。无许可证项目仅可提供抽象能力启发，不复制其代码或文字。
 
-## Release policy
-
-`v0.2.0` 是上一公开标签。v0.3 仅为内部开发中间态，从未作为正式版本发布；本仓库直接发布 `v0.4.0`，不重写历史。
-
-## License
+## 许可证
 
 [MIT](LICENSE)

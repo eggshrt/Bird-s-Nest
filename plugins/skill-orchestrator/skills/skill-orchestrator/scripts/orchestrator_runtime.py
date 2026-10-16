@@ -105,7 +105,7 @@ def validate_collaboration_context(context: dict[str, Any]) -> list[str]:
 def validate_requirement(contract: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     required = {
-        "schema_version", "goal", "asset_input", "audience", "target_platform",
+        "schema_version", "goal", "audience", "target_platform",
         "in_scope", "out_of_scope", "constraints", "acceptance_criteria",
         "collaboration_context", "confirmations", "open_questions",
     }
@@ -115,8 +115,17 @@ def validate_requirement(contract: dict[str, Any]) -> list[str]:
     if contract.get("schema_version") != "RequirementContractV2":
         errors.append("schema_version must be RequirementContractV2")
     asset = contract.get("asset_input")
-    if not isinstance(asset, dict) or not all(asset.get(key) for key in ("asset_id", "requirement_path", "requirement_hash")):
-        errors.append("asset_input must identify one asset, path, and hash")
+    authoritative = contract.get("authoritative_input")
+    if asset is not None and authoritative is not None:
+        errors.append("use asset_input or authoritative_input, not both")
+    elif asset is not None:
+        if not isinstance(asset, dict) or not all(asset.get(key) for key in ("asset_id", "requirement_path", "requirement_hash")):
+            errors.append("asset_input must identify one asset, path, and hash")
+    elif authoritative is not None:
+        if not isinstance(authoritative, dict) or not all(authoritative.get(key) for key in ("semantic_type", "path", "sha256")):
+            errors.append("authoritative_input must identify semantic type, path, and hash")
+    else:
+        errors.append("asset_input or authoritative_input is required")
     if contract.get("open_questions"):
         errors.append("open_questions must be empty before graph confirmation")
     errors.extend(validate_collaboration_context(contract.get("collaboration_context", {})))

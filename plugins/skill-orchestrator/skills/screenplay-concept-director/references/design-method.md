@@ -16,6 +16,8 @@ Close these branches for every asset:
 - invariants, continuity, forbidden defaults, and cultural exclusions;
 - intended use, aspect ratio, production feasibility, references, and observable acceptance criteria.
 
+Register resolved dimensions directly; do not turn every item into a mandatory interview question. Consequential unresolved dimensions remain open and block approval. A non-applicable dimension uses `{"status": "not_applicable", "reason": "specific reason"}`; empty strings, null values, and unexplained placeholders do not resolve it.
+
 Each user reference needs one or more `controls` and one or more `must_not_control` entries. A reference never silently controls identity, costume, material, pose, composition, palette, lighting, and style at once.
 
 ## Character master
@@ -40,18 +42,20 @@ Reject stereotype-to-costume shortcuts. Externalize personality through repeated
 - value/color/material system and primary recognition anchors;
 - reusable invariants plus approved time, weather, occupation, damage, and narrative-state deltas.
 
-Reject attractive architecture that does not explain how people live, work, move, control access, or leave traces.
+Reject attractive architecture that does not explain how people live, work, move, control access, or leave traces. The downstream image requirement uses `output_scope: pure_environment`; occupants may explain traces of use without becoming visible subjects.
 
 ## Scene state
 
-- exact `location_master` reference and screenplay scene/beat ids;
+- exact versioned `location_master` in `dependency_assets` using `ref_asset_id`, its requirement path/hash, and screenplay scene/beat ids;
 - dramatic purpose, selected moment, audience information, participants, and power relation;
 - spatial changes from the location master, blocking zones, attention hierarchy, must-see and must-hide information;
 - time, weather, atmosphere, motivated light, environmental motion, and physical interaction;
 - entry/exit continuity, change from the master, and what must reset or persist afterward;
 - production complexity and a simpler fallback that preserves dramatic intent.
 
-This is a state of one scene, not a shot list and not a generation prompt.
+The accepted output is a pure-environment state of one scene with `output_scope: pure_environment`. Participants, power relations, and dramatic purpose are context for environmental choices. The location master is a read-only dependency, not a second creative subject.
+
+When the requested output depicts participants, performance, or dramatic blocking, preserve that intent and route it to `$screenplay-scene-daoyanzu`. Only produce an environment-only extraction from such a request after the user explicitly chooses that reduced scope. This contract does not produce shot lists or generation prompts.
 
 ## Hero prop
 

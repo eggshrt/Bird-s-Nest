@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SeedanceShotPromptRecordCollectionV2",
+  "title": "Seedance shot prompt record collection v2",
+  "type": "object",
+  "required": ["schema_version", "records"],
+  "properties": {
+    "schema_version": {"const": "SeedanceShotPromptRecordCollectionV2"},
+    "review_label": {"type": "string", "minLength": 1},
+    "knowledge": {
+      "type": "object",
+      "properties": {
+        "prompt_pack": {"type": "string", "minLength": 1},
+        "performance_action_pack": {"type": "string", "minLength": 1},
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source_id", "title", "source_sha256", "publication_status", "activation"],
+            "properties": {
+              "source_id": {"type": "string", "minLength": 1},
+              "title": {"type": "string", "minLength": 1},
+              "source_sha256": {"type": "string", "minLength": 1},
+              "publication_status": {"const": "published"},
+              "activation": {"enum": ["active", "inactive"]}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "records": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/record"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "record": {
+      "type": "object",
+      "required": ["shot_id", "visual", "performance_beats", "sound_design", "camera_segments", "prompt"],
+      "properties": {
+        "shot_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*S[0-9]{3}C[0-9]{3}$"},
+        "visual": {"type": "string", "minLength": 1},
+        "performance_beats": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/performance_beat"}},
+        "sound_design": {"$ref": "#/$defs/sound_design"},
+        "camera_segments": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/camera_segment"}},
+        "enrichment_scope": {"const": "non_narrative_performance_only"},
+        "prompt": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "performance_beat": {
+      "type": "object",
+      "required": ["beat_id", "trigger", "dialogue_fragment", "visible_action", "micro_expression", "voice", "end_state", "camera_segment_id"],
+      "properties": {
+        "beat_id": {"type": "string", "minLength": 1},
+        "trigger": {"type": "string", "minLength": 1},
+        "dialogue_fragment": {"type": "string"},
+        "speaker": {"type": "string"},
+        "visible_action": {"type": "string", "minLength": 1},
+        "micro_expression": {"type": "string", "minLength": 1},
+        "voice": {"type": "string", "minLength": 1},
+        "end_state": {"type": "string", "minLength": 1},
+        "camera_segment_id": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "sound_design": {
+      "type": "object",
+      "required": ["ambient_bed", "spot_effects", "silence_beats"],
+      "properties": {
+        "ambient_bed": {"type": "string", "minLength": 1},
+        "spot_effects": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "silence_beats": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+    "camera_segment": {
+      "type": "object",
+      "required": ["segment_id", "framing", "movement", "angle", "camera_position", "lens", "axis"],
+      "properties": {
+        "segment_id": {"type": "string", "minLength": 1},
+        "framing": {"type": "string", "minLength": 1},
+        "movement": {"type": "string", "minLength": 1},
+        "angle": {"type": "string", "minLength": 1},
+        "camera_position": {"type": "string", "minLength": 1},
+        "lens": {"type": "string", "minLength": 1},
+        "axis": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  }
+}

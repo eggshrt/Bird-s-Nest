@@ -25,12 +25,14 @@ Separate every substantive statement into one of:
 
 The user owns the final aesthetic decision. When overridden, record the original recommendation, user choice, consequence, and acceptance.
 
-The director may block completion only when:
+Creative vetoes are limited to cases where:
 
 - the proposal contradicts established screenplay facts;
 - it breaches a confirmed cultural boundary;
 - it is incompatible with confirmed production constraints;
-- it introduces more than one stable asset id.
+- it introduces more than one creative subject.
+
+Versioned, hash-bound read-only dependencies do not count as additional subjects. Separately, incomplete evidence, unresolved consequential decisions, and failed contract validation block delivery regardless of aesthetic agreement.
 
 ## Recommendation standard
 

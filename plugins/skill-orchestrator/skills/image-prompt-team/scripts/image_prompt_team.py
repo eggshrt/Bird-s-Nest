@@ -5,12 +5,16 @@ from __future__ import annotations
 
 import argparse
 from copy import deepcopy
+from functools import lru_cache
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
 import re
+import shutil
 import sys
+import tempfile
 import threading
 from typing import Any
 
@@ -44,6 +48,31 @@ CONTROL_ROLE_SKILLS = {
 }
 CONDITIONAL_ROLE_SKILLS = {"reference": "reference-role-director"}
 ROLE_SKILLS = {**CREATIVE_ROLE_SKILLS, **CONTROL_ROLE_SKILLS, **CONDITIONAL_ROLE_SKILLS}
+FULL_REQUIREMENT_ROLES = {
+    "evidence-guardian", "visual-spec-assembler", "adversarial-reviewer", "synthesis-adjudicator",
+}
+KNOWN_REQUIREMENT_FIELDS = {
+    "schema_version", "version", "baseline_ref", "asset", "primary_state", "derived_states",
+    "design_dimensions", "evidence", "high_impact_decisions", "reference_images",
+    "production_constraints", "cultural_boundaries", "invariants", "exclusions",
+    "acceptance_criteria", "open_questions", "confirmations", "contract_revision",
+    "creative_position_hash", "integrity", "dependency_assets", "persistence_plan", "output_scope",
+}
+RUNTIME_REQUIREMENT_FIELDS = {
+    "confirmations": {"gate", "confirmed", "confirmed_at", "confirmed_by", "message_ref", "content_hash"},
+    "persistence_plan": {"output_root", "files", "validators", "design_book_path"},
+    "integrity": {"requirement_hash"},
+}
+KNOWN_RESULT_FIELDS = {
+    "schema_version", "task_id", "status", "summary", "claims", "evidence_refs",
+    "artifact_refs", "conflicts", "questions", "errors", "metrics",
+}
+ROLE_VIEW_INSTRUCTION = (
+    "RoleRequirementViewV1 is a view of the already validated sealed requirement identified by "
+    "source_requirement_hash (SHA-256 of the source file); only confirmation, persistence and integrity bookkeeping is omitted. "
+    "All design, evidence, state boundaries, user overrides and constraints remain authoritative; "
+    "do not treat this view as a new or independently sealed requirement."
+)
 
 AGENT_RESULT_SCHEMA = {
     "type": "object", "additionalProperties": False,
@@ -94,34 +123,41 @@ def collect_keys(value: Any) -> set[str]:
     return keys
 
 
-def validate_visual_requirement(requirement: dict[str, Any]) -> list[str]:
-    errors: list[str] = []
-    if requirement.get("schema_version") != "VisualAssetRequirementV1":
-        errors.append("schema_version must be VisualAssetRequirementV1")
-    asset = requirement.get("asset")
-    if not isinstance(asset, dict) or not all(asset.get(key) for key in ("asset_id", "asset_type", "name")):
-        errors.append("asset must contain asset_id, asset_type, and name")
-    elif asset.get("asset_type") not in ASSET_TYPES:
-        errors.append("unsupported asset_type")
-    if len(collect_asset_ids(requirement)) != 1:
-        errors.append("requirement must contain exactly one asset_id")
-    if requirement.get("open_questions"):
-        errors.append("open_questions must be empty")
-    for index, decision in enumerate(requirement.get("high_impact_decisions", [])):
-        if decision.get("status") != "accepted":
-            errors.append(f"high_impact_decisions[{index}] is not accepted")
-    gates = {item.get("gate") for item in requirement.get("confirmations", []) if item.get("confirmed") is True}
-    if not {"asset_selection", "design_requirement", "persistence_plan"}.issubset(gates):
-        errors.append("all three upstream confirmations are required")
-    if isinstance(requirement.get("freshness"), dict) and requirement["freshness"].get("status") not in (None, "fresh"):
-        errors.append("requirement baseline is stale")
-    for index, evidence in enumerate(requirement.get("evidence", [])):
-        if evidence.get("kind") == "fact" and not evidence.get("source_refs"):
-            errors.append(f"evidence[{index}] fact has no source_refs")
-    forbidden = sorted(collect_keys(requirement).intersection({"prompt", *FORBIDDEN_PACKAGE_KEYS}))
-    if forbidden:
-        errors.append("upstream requirement contains forbidden downstream fields: " + ", ".join(forbidden))
-    return sorted(set(errors))
+@lru_cache(maxsize=1)
+def concept_director_validator():
+    """Load the bundled upstream authority without resolving arbitrary import paths."""
+    path = Path(__file__).resolve().parents[2] / "screenplay-concept-director" / "scripts" / "concept_director.py"
+    name = "_image_prompt_team_concept_director"
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load the bundled concept-director validator: {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+        return module.validate_handoff
+    except Exception:
+        sys.modules.pop(name, None)
+        raise
+
+
+def validate_visual_requirement(requirement: dict[str, Any], requirement_path: Path | None = None) -> list[str]:
+    """Use the same sealed-package contract as concept direction; never accept a weaker copy."""
+    try:
+        validator = concept_director_validator()
+    except (ImportError, OSError, AttributeError) as exc:
+        return [f"shared concept-director validator is unavailable: {exc}"]
+    return validator(requirement, requirement_path=requirement_path)
+
+
+def load_validated_requirement(path: Path, expected_hash: str | None = None) -> dict[str, Any]:
+    if expected_hash is not None and file_hash(path) != expected_hash:
+        raise ValueError("requirement changed after run; derive a new v0.4 run")
+    requirement = read_json(path)
+    errors = validate_visual_requirement(requirement, requirement_path=path)
+    if errors:
+        raise ValueError("Invalid VisualAssetRequirementV1: " + "; ".join(errors))
+    return requirement
 
 
 def validate_position(position: dict[str, Any]) -> list[str]:
@@ -182,6 +218,78 @@ def build_context(requirement: dict[str, Any]) -> dict[str, Any]:
     return {"schema_version": "CollaborationContextV1", "version": 1, "shared_known": shared, "user_context_gaps": [], "agent_added_context": [{"id": "agent-001", "statement": "OpenAI compiler orders scene, subject, visible details, composition/light, then a few invariants.", "provenance": "OpenAI GPT Image prompting guide", "confidence": "high", "impact": "prompt_structure", "status": "accepted_method", "verification": "gold tests"}], "joint_unknown_hypotheses": []}
 
 
+def build_task_projection(
+    node: dict[str, Any], requirement: dict[str, Any], dependencies: dict[str, dict[str, Any]],
+    context: dict[str, Any], requirement_hash: str,
+) -> dict[str, Any]:
+    """Project an already validated handoff without selecting or summarizing creative content.
+
+    Unknown contracts use the complete input. This is a dispatch representation only;
+    validation, persistence, cache identity and user confirmations still use the original.
+    """
+    projected = {
+        "requirement": deepcopy(requirement),
+        "collaboration_context_projection": deepcopy(context),
+        "dependency_results": deepcopy(dependencies),
+    }
+    known_roles = set(ROLE_SKILLS.values()) | set(ASSET_ROLE_SKILLS.values())
+    if (node.get("role_skill") not in known_roles
+            or requirement.get("schema_version") != "VisualAssetRequirementV1"
+            or set(requirement) - KNOWN_REQUIREMENT_FIELDS
+            or not isinstance(requirement_hash, str)
+            or not re.fullmatch(r"[a-f0-9]{64}", requirement_hash)):
+        return projected
+    # Additional fields inside omitted bookkeeping may acquire meaning in a later contract.
+    for field, known in RUNTIME_REQUIREMENT_FIELDS.items():
+        value = requirement.get(field)
+        records = value if field == "confirmations" and isinstance(value, list) else [value]
+        if any(not isinstance(record, dict) or set(record) - known for record in records):
+            return projected
+
+    if node["role_skill"] not in FULL_REQUIREMENT_ROLES:
+        view = projected["requirement"]
+        for field in RUNTIME_REQUIREMENT_FIELDS:
+            view.pop(field, None)
+        view.update({
+            "schema_version": "RoleRequirementViewV1",
+            "source_requirement_schema": requirement["schema_version"],
+            "source_requirement_hash": requirement_hash,
+            "omitted_runtime_fields": list(RUNTIME_REQUIREMENT_FIELDS),
+        })
+
+    # Remove only the exact generated duplicate, never independent context or new findings.
+    generated_context = build_context(requirement)
+    if (context.get("schema_version") == "CollaborationContextV1"
+            and not set(context) - set(generated_context)
+            and context.get("shared_known") == generated_context["shared_known"]):
+        projected_context = projected["collaboration_context_projection"]
+        projected_context["schema_version"] = "CollaborationContextViewV1"
+        projected_context["source_context_schema"] = context["schema_version"]
+        projected_context["shared_known"] = []
+        projected_context["shared_known_ref"] = {
+            "from": "requirement.evidence", "source_requirement_hash": requirement_hash,
+            "meaning": "Complete evidence remains inline; preserve its fact/inference/decision/preference kinds.",
+        }
+
+    for key, result in dependencies.items():
+        if not isinstance(result, dict) or set(result) - KNOWN_RESULT_FIELDS:
+            continue
+        if result.get("schema_version") != "AgentResultV1":
+            continue
+        # Empty metrics and the literal boilerplate summary have no task content. Preserve
+        # nonempty metrics and every other summary, including failed/blocked explanations.
+        compact = deepcopy(result)
+        compact["schema_version"] = "AgentResultViewV1"
+        compact["source_result_schema"] = result["schema_version"]
+        compact.pop("task_id", None)
+        if not compact.get("metrics"):
+            compact.pop("metrics", None)
+        if compact.get("summary") in (None, "", "completed"):
+            compact.pop("summary", None)
+        projected["dependency_results"][key] = compact
+    return projected
+
+
 def build_contract(requirement: dict[str, Any], path: Path, presentation: dict[str, str]) -> dict[str, Any]:
     asset = requirement["asset"]
     return {"schema_version": "RequirementContractV2", "goal": f"为单一资产 {asset['name']} 编译一条证据约束的 OpenAI 中文母提示词", "asset_input": {"asset_id": asset["asset_id"], "asset_type": asset["asset_type"], "requirement_path": str(path.resolve()), "requirement_hash": file_hash(path)}, "audience": ["视觉开发创作者"], "target_platform": "openai-gpt-image-primary", "in_scope": ["visual_prompt_spec", "single_generation_prompt", "local_audit"], "out_of_scope": ["design_redesign", "negative_prompt", "model_parameters", "image_generation", "external_write"], "constraints": ["single_asset", "Chinese_only", "positive_observable_language", "max_three_final_constraints"], "acceptance_criteria": requirement.get("acceptance_criteria", []), "collaboration_context": build_context(requirement), "presentation": presentation, "confirmations": [], "open_questions": []}
@@ -189,9 +297,23 @@ def build_contract(requirement: dict[str, Any], path: Path, presentation: dict[s
 
 def recommend_presentation(requirement: dict[str, Any]) -> dict[str, str]:
     kind = requirement["asset"]["asset_type"]
-    if kind == "character_master": return {"intended_use": "人物母版设计评审", "framing": "全身正面偏三分之四视角，人物完整入画", "aspect_ratio": "2:3竖幅"}
-    if kind in {"location_master", "scene_state"}: return {"intended_use": "纯环境场景资产评审", "framing": "中低机位超广角，前中后景三层清楚", "aspect_ratio": "21:9超宽银幕"}
-    return {"intended_use": "核心道具资产评审", "framing": "三分之四视角，完整轮廓与操作结构清楚", "aspect_ratio": "4:3横幅"}
+    if kind == "character_master":
+        presentation = {"intended_use": "人物母版设计评审", "framing": "全身正面偏三分之四视角，人物完整入画", "aspect_ratio": "2:3竖幅"}
+    elif kind in {"location_master", "scene_state"}:
+        presentation = {"intended_use": "纯环境场景资产评审", "framing": "中低机位超广角，前中后景三层清楚", "aspect_ratio": "21:9超宽银幕"}
+    else:
+        presentation = {"intended_use": "核心道具资产评审", "framing": "三分之四视角，完整轮廓与操作结构清楚", "aspect_ratio": "4:3横幅"}
+    shared = requirement.get("design_dimensions", {}).get("shared", {})
+    use_case, frame = shared.get("use_case"), shared.get("frame")
+    if isinstance(use_case, str) and use_case.strip():
+        presentation["intended_use"] = use_case.strip()
+    if isinstance(frame, str) and frame.strip():
+        presentation["framing"] = frame.strip()
+    elif isinstance(frame, dict):
+        for key in ("framing", "aspect_ratio"):
+            if isinstance(frame.get(key), str) and frame[key].strip():
+                presentation[key] = frame[key].strip()
+    return presentation
 
 
 def graph_node(node_id: str, role: str, objective: str, deps: list[str], output_type: str, mode: str = "serial") -> dict[str, Any]:
@@ -337,7 +459,7 @@ class DeterministicExecutor:
             result["claims"] = [{"claim_type": "evidence_check", "value": {"asset_id": self.requirement["asset"]["asset_id"], "facts": facts, "invariants": self.requirement.get("invariants", [])}}]
             result["evidence_refs"] = sorted({ref for item in facts for ref in item.get("source_refs", [])})
         elif node_id == "reference-role":
-            refs = [{"reference_hash": item.get("sha256", hash_json(item)), "allowed_dimension": item.get("responsibility", "single declared dimension"), "forbidden_dimensions": item.get("must_not_control", []), "observations": [], "originality_checks": ["do not copy composition and design identity together"]} for item in self.requirement.get("reference_images", [])]
+            refs = [{"reference_hash": item.get("sha256", hash_json(item)), "allowed_dimension": "、".join(item.get("controls", [])) or item.get("responsibility", "single declared dimension"), "forbidden_dimensions": item.get("must_not_control", []), "observations": [], "originality_checks": ["do not copy composition and design identity together"]} for item in self.requirement.get("reference_images", [])]
             result["claims"] = [{"claim_type": "reference_roles", "value": {"schema_version": "ReferenceRoleV1", "asset_id": self.requirement["asset"]["asset_id"], "references": refs}}]
         elif node_id == "asset-specialist" or node_id.startswith("position-"):
             result["claims"] = [{"claim_type": "expert_position", "value": expert_position(role, self.requirement, self.presentation)}]
@@ -378,6 +500,13 @@ class CodexExecutor:
 
     def __call__(self, node: dict[str, Any], dependencies: dict[str, dict[str, Any]], attempt: int) -> tuple[dict[str, Any], str | None]:
         task = {"schema_version": "AgentTaskV1", "run_id": self.run_id, "node_id": node["node_id"], "task_id": f"{self.run_id}:{node['node_id']}:{attempt}", "role_skill": node["role_skill"], "objective": node["objective"], "requirement": self.requirement, "presentation": self.presentation, "collaboration_context_projection": self.context, "dependency_results": dependencies, "expected_output_schema": node["output_schema"], "constraints": ["single_asset", "no_user_interview", "no_files", "no_image_generation", "no_design_redesign"], "permissions": node["permissions"], "deadline_seconds": node["hard_timeout_seconds"], "dispatcher_answers": self.answers}
+        task.update(build_task_projection(node, self.requirement, dependencies, self.context, self.requirement_hash))
+        if task["requirement"].get("schema_version") == "RoleRequirementViewV1":
+            task["constraints"].append(ROLE_VIEW_INSTRUCTION)
+        if task["collaboration_context_projection"].get("shared_known_ref"):
+            task["constraints"].append("CollaborationContextViewV1 is a read-only view: shared_known_ref resolves to complete inline requirement.evidence, not missing creative data.")
+        if any(result.get("schema_version") == "AgentResultViewV1" for result in task["dependency_results"].values() if isinstance(result, dict)):
+            task["constraints"].append("AgentResultViewV1 is a read-only view indexed by upstream node; omitted runtime envelope fields are not missing creative data. Retain every claim, conflict and user override.")
         task["dispatcher_signature"] = sign_task(task, self.dispatcher_key)
         current = next(item for item in self.store.snapshot(self.run_id)["nodes"] if item["node_id"] == node["node_id"])
         def remember_thread(thread_id: str) -> None:
@@ -434,7 +563,7 @@ def materialize(store: EventStore, run_id: str, requirement: dict[str, Any], pro
         raise ValueError("ImagePromptPackageV2 does not bind to the confirmed VisualPromptSpecV1 content")
     errors = validate_spec(spec) + validate_package(package)
     if errors: raise ValueError("formal output validation failed: " + "; ".join(errors))
-    output = next_output_dir(project.resolve(), requirement); output.mkdir(parents=True, exist_ok=False)
+    output = next_output_dir(project.resolve(), requirement)
     report = run_report(snapshot, package); report["final_status"] = "approved"
     files = {
         "generation-prompt.txt": package["generation_prompt"].rstrip() + "\n",
@@ -443,9 +572,23 @@ def materialize(store: EventStore, run_id: str, requirement: dict[str, Any], pro
         "decision-log.md": f"# Decision log\n\n- Run: `{run_id}`\n- Requirement hash: `{package['requirement_hash']}`\n- Visual spec hash: `{package['visual_prompt_spec_hash']}`\n- Final confirmation: {package['confirmation']['confirmed_at']}\n- Design statement: linked upstream, not regenerated\n- Negative prompt: not produced\n- Image generation: not performed\n",
         "run-report.json": json.dumps(report, ensure_ascii=False, indent=2) + "\n",
     }
-    for name, content in files.items():
-        path = output / name; path.write_text(content, encoding="utf-8")
-        store.append(run_id, "artifact_recorded", {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "kind": name, "node_id": "openai-compiler"})
+    output.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{output.name}-", dir=output.parent))
+    artifacts = []
+    try:
+        for name, content in files.items():
+            path = staging / name
+            path.write_text(content, encoding="utf-8")
+            artifacts.append({"path": str(output / name), "sha256": file_hash(path), "kind": name, "node_id": "openai-compiler"})
+        if output.exists():
+            raise FileExistsError(f"Output version already exists: {output}")
+        staging.rename(output)
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging)
+    # All files are published together; database recording starts only afterwards.
+    for artifact in artifacts:
+        store.append(run_id, "artifact_recorded", artifact)
     store.record_approval(run_id, "final_prompt", "confirmed", {"output": str(output)})
     store.set_run_status(run_id, "approved", degraded=bool(snapshot["degraded"]))
     return {"status": "approved", "run_id": run_id, "output": str(output), "package": package}
@@ -491,8 +634,7 @@ def main() -> int:
         project, db = args.project.resolve(), args.db or default_db(args.project.resolve())
         if args.command in {"preview", "run"}:
             if args.collaboration_mode == "plan": raise PermissionError("Plan Mode cannot create or execute an image-prompt-team run; switch to Default mode")
-            requirement_path = args.requirement.resolve(); requirement = read_json(requirement_path); errors = validate_visual_requirement(requirement)
-            if errors: raise ValueError("Invalid VisualAssetRequirementV1: " + "; ".join(errors))
+            requirement_path = args.requirement.resolve(); requirement = load_validated_requirement(requirement_path)
             recommended = recommend_presentation(requirement); supplied = {"intended_use": args.intended_use, "framing": args.framing, "aspect_ratio": args.aspect_ratio}; accepted = args.accept_presentation_recommendation or all(supplied.values()); presentation = recommended if args.accept_presentation_recommendation else supplied
             preview = initial_preview(requirement, presentation if accepted else recommended, accepted)
             if args.command == "preview" or not args.confirm_initial or not accepted: print(json.dumps(preview, ensure_ascii=False, indent=2)); return 3
@@ -507,8 +649,8 @@ def main() -> int:
             if snapshot["status"] != "awaiting_spec_confirmation": raise ValueError("run is not awaiting VisualPromptSpec confirmation")
             if not args.confirm_spec: raise PermissionError("VisualPromptSpec confirmation is required")
             requirement_path = Path(snapshot["metadata"]["requirement_path"])
-            if file_hash(requirement_path) != snapshot["metadata"]["requirement_hash"]: raise ValueError("requirement changed after run; derive a new v0.4 run")
-            requirement, presentation, spec = read_json(requirement_path), snapshot["metadata"]["presentation"], find_spec(snapshot); errors = validate_spec(spec)
+            requirement = load_validated_requirement(requirement_path, snapshot["metadata"]["requirement_hash"])
+            presentation, spec = snapshot["metadata"]["presentation"], find_spec(snapshot); errors = validate_spec(spec)
             if errors: raise ValueError("Invalid VisualPromptSpecV1: " + "; ".join(errors))
             store.record_approval(args.run_id, "visual_prompt_spec", "confirmed", spec_preview(spec)); store.register_patch(args.run_id, build_compile_patch(store.graph(args.run_id)), confirmed=True)
             current = store.snapshot(args.run_id); executor, client = build_executor(args, client, store, current, requirement, presentation, project); completed = Scheduler(store, 3).execute(args.run_id, executor); package = find_package(completed)
@@ -517,19 +659,20 @@ def main() -> int:
             store = EventStore(db)
             if not args.confirm_final: raise PermissionError("final prompt confirmation is required")
             snapshot = store.snapshot(args.run_id); require_v04(snapshot); requirement_path = Path(snapshot["metadata"]["requirement_path"])
-            if file_hash(requirement_path) != snapshot["metadata"]["requirement_hash"]: raise ValueError("requirement changed after run; derive a new v0.4 run")
-            payload = materialize(store, args.run_id, read_json(requirement_path), project)
+            requirement = load_validated_requirement(requirement_path, snapshot["metadata"]["requirement_hash"])
+            payload = materialize(store, args.run_id, requirement, project)
         elif args.command == "status": payload = EventStore(db).snapshot(args.run_id)
         elif args.command == "cancel":
             store = EventStore(db); store.cancel(args.run_id); payload = store.snapshot(args.run_id)
         elif args.command == "resume":
             store = EventStore(db); current = store.snapshot(args.run_id); require_v04(current)
+            requirement_path = Path(current["metadata"]["requirement_path"])
+            requirement = load_validated_requirement(requirement_path, current["metadata"]["requirement_hash"])
             if current["status"] != "awaiting_user": payload = current
             else:
                 if not args.answer or len(args.answer) > 3: raise ValueError("resume needs one to three answers")
-                store.append(args.run_id, "user_input_recorded", {"answers": args.answer}, actor="user", graph_version=current["graph_version"]); requirement_path = Path(current["metadata"]["requirement_path"])
-                if file_hash(requirement_path) != current["metadata"]["requirement_hash"]: raise ValueError("requirement changed after run; derive a new v0.4 run")
-                requirement = read_json(requirement_path); executor, client = build_executor(args, client, store, current, requirement, current["metadata"]["presentation"], project, args.answer); phase = "proposed" if any(node["node_id"] == "openai-compiler" for node in store.graph(args.run_id)["nodes"]) else "awaiting_spec_confirmation"; snapshot = Scheduler(store, 3).execute(args.run_id, executor, completion_status=phase); payload = {"run_id": args.run_id, "status": snapshot["status"], "advanced": run_report(snapshot, find_package(snapshot) if phase == "proposed" else None)}
+                store.append(args.run_id, "user_input_recorded", {"answers": args.answer}, actor="user", graph_version=current["graph_version"])
+                executor, client = build_executor(args, client, store, current, requirement, current["metadata"]["presentation"], project, args.answer); phase = "proposed" if any(node["node_id"] == "openai-compiler" for node in store.graph(args.run_id)["nodes"]) else "awaiting_spec_confirmation"; snapshot = Scheduler(store, 3).execute(args.run_id, executor, completion_status=phase); payload = {"run_id": args.run_id, "status": snapshot["status"], "advanced": run_report(snapshot, find_package(snapshot) if phase == "proposed" else None)}
         else: raise ValueError(args.command)
         print(json.dumps(redact(payload), ensure_ascii=False, indent=2)); return 0
     except (OSError, ValueError, KeyError, PermissionError, json.JSONDecodeError) as exc:

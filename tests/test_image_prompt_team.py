@@ -10,6 +10,7 @@ import tempfile
 import unittest
 
 import yaml
+from concept_fixtures import ConceptFixture
 
 REPO = Path(__file__).resolve().parents[1]
 SCRIPT = REPO / "plugins" / "skill-orchestrator" / "skills" / "image-prompt-team" / "scripts" / "image_prompt_team.py"
@@ -38,19 +39,45 @@ class ImagePromptTeamTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory(); self.addCleanup(self.temporary.cleanup); self.base = Path(self.temporary.name)
 
-    def write_requirement(self, payload: dict | None = None) -> Path:
-        path = self.base / "requirement.json"; path.write_text(json.dumps(payload or requirement(), ensure_ascii=False, indent=2), encoding="utf-8"); return path
+    def write_requirement(self) -> Path:
+        self.fixture = ConceptFixture(self.base)
+        return self.fixture.write_package()
 
     def run_cli(self, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run([sys.executable, str(SCRIPT), "--project", str(self.base), *args], text=True, capture_output=True, env={**os.environ, "ORCHESTRATOR_TEST_MODE": "1"})
 
     def test_sealed_single_asset_validation(self) -> None:
-        self.assertEqual(team.validate_visual_requirement(requirement()), [])
-        payload = requirement(); payload["derived_states"] = [{"state_id": "other", "asset_id": "chr-002"}]
-        self.assertTrue(any("exactly one" in error for error in team.validate_visual_requirement(payload)))
-        payload = requirement(); payload["high_impact_decisions"][0]["status"] = "proposed"; payload["evidence"][0]["source_refs"] = []; payload["design_dimensions"]["shared"]["prompt"] = "forbidden"
-        errors = team.validate_visual_requirement(payload)
-        self.assertTrue(any("not accepted" in error for error in errors)); self.assertTrue(any("no source_refs" in error for error in errors)); self.assertTrue(any("forbidden downstream" in error for error in errors))
+        path = self.write_requirement()
+        payload = team.read_json(path)
+        self.assertEqual(team.validate_visual_requirement(payload, path), [])
+        self.assertTrue(team.validate_visual_requirement(payload), "formal handoff requires a disk-backed package")
+        (path.parent / "creative-position.json").unlink()
+        self.assertTrue(team.validate_visual_requirement(payload, path), "missing companion must fail closed")
+
+    def test_user_override_remains_a_valid_upstream_decision(self) -> None:
+        path = self.write_requirement()
+        payload = team.read_json(path)
+        payload["high_impact_decisions"][0]["status"] = "user_override"
+        payload["high_impact_decisions"][0]["original_recommendation"] = "保持最低视觉对比。"
+        payload = self.fixture.approve(payload, self.fixture.snapshot, self.fixture.position)
+        self.fixture.write_package(requirement=payload, path=path)
+        self.assertEqual(team.validate_visual_requirement(payload, path), [])
+
+    def test_requirement_rejects_changed_design_and_current_source(self) -> None:
+        path = self.write_requirement()
+        payload = team.read_json(path)
+        payload["primary_state"]["design_direction"] = "未重新确认的新方向"
+        self.assertTrue(team.validate_visual_requirement(payload, path))
+        payload = team.read_json(path)
+        self.fixture.source.write_text("A rewritten screenplay.\n", encoding="utf-8")
+        self.assertTrue(team.validate_visual_requirement(payload, path), "a matching requirement hash does not prove current source freshness")
+
+    def test_presentation_preserves_confirmed_upstream_values(self) -> None:
+        payload = requirement()
+        payload["design_dimensions"]["shared"].update({"use_case": "角色服装制作审阅", "frame": {"framing": "全身背面，完整展示服装层级", "aspect_ratio": "3:4"}})
+        self.assertEqual(team.recommend_presentation(payload), {"intended_use": "角色服装制作审阅", "framing": "全身背面，完整展示服装层级", "aspect_ratio": "3:4"})
+        payload["design_dimensions"]["shared"]["frame"] = "全身侧面"
+        self.assertEqual(team.recommend_presentation(payload)["framing"], "全身侧面")
 
     def test_graph_runs_six_roles_one_type_role_and_optional_reference(self) -> None:
         payload = requirement(); graph = team.build_graph(payload); roles = {item["role_skill"] for item in graph["nodes"]}
@@ -112,6 +139,53 @@ class ImagePromptTeamTests(unittest.TestCase):
         self.assertEqual(approved.returncode, 0, approved.stdout + approved.stderr); output = Path(json.loads(approved.stdout)["output"])
         self.assertEqual({item.name for item in output.iterdir()}, {"generation-prompt.txt", "visual-prompt-spec.json", "prompt-package.json", "decision-log.md", "run-report.json"})
         package = json.loads((output / "prompt-package.json").read_text(encoding="utf-8")); spec = json.loads((output / "visual-prompt-spec.json").read_text(encoding="utf-8")); self.assertEqual(package["status"], "approved"); self.assertEqual(team.validate_package(package), []); self.assertNotIn("design_statement", package); self.assertEqual(package["visual_prompt_spec_hash"], team.spec_content_hash(spec))
+
+    def test_each_mutating_gate_revalidates_companions_and_source(self) -> None:
+        source, db = self.write_requirement(), self.base / "runtime.sqlite3"
+        source_text = self.fixture.source.read_text(encoding="utf-8")
+        self.fixture.source.write_text("A rewritten screenplay.\n", encoding="utf-8")
+        run_args = ("--db", str(db), "run", "--requirement", str(source), "--confirm-initial", "--accept-presentation-recommendation", "--backend", "deterministic", "--test-mode")
+        rejected = self.run_cli(*run_args)
+        self.assertEqual(rejected.returncode, 2, rejected.stdout)
+        self.assertFalse(db.exists(), "stale source must fail before creating a run")
+
+        self.fixture.source.write_text(source_text, encoding="utf-8")
+        first = self.run_cli(*run_args)
+        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        run_id = json.loads(first.stdout)["run_id"]
+        store = team.EventStore(db)
+        self.fixture.source.write_text("A rewritten screenplay.\n", encoding="utf-8")
+        events_before = store.events(run_id)
+        confirm_args = ("--db", str(db), "confirm-spec", "--run-id", run_id, "--confirm-spec", "--backend", "deterministic", "--test-mode")
+        rejected = self.run_cli(*confirm_args)
+        self.assertEqual(rejected.returncode, 2, rejected.stdout)
+        self.assertEqual(store.events(run_id), events_before, "failed handoff must not record spec approval")
+
+        self.fixture.source.write_text(source_text, encoding="utf-8")
+        second = self.run_cli(*confirm_args)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+        position_path = source.parent / "creative-position.json"
+        position_text = position_path.read_text(encoding="utf-8")
+        position = json.loads(position_text)
+        position["claim"] = "A changed creative position."
+        position_path.write_text(json.dumps(position), encoding="utf-8")
+        events_before = store.events(run_id)
+        rejected = self.run_cli("--db", str(db), "approve", "--run-id", run_id, "--confirm-final")
+        self.assertEqual(rejected.returncode, 2, rejected.stdout)
+        self.assertEqual(store.events(run_id), events_before, "failed handoff must not record final approval")
+        self.assertFalse((self.base / "outputs").exists())
+
+        position_path.write_text(position_text, encoding="utf-8")
+        resumed_run = self.run_cli(*run_args)
+        self.assertEqual(resumed_run.returncode, 0, resumed_run.stdout + resumed_run.stderr)
+        run_id = json.loads(resumed_run.stdout)["run_id"]
+        store.set_run_status(run_id, "running")
+        store.set_run_status(run_id, "awaiting_user")
+        self.fixture.source.write_text("A rewritten screenplay.\n", encoding="utf-8")
+        events_before = store.events(run_id)
+        rejected = self.run_cli("--db", str(db), "resume", "--run-id", run_id, "--answer", "保留现有设计", "--backend", "deterministic", "--test-mode")
+        self.assertEqual(rejected.returncode, 2, rejected.stdout)
+        self.assertEqual(store.events(run_id), events_before, "failed handoff must not record new answers")
 
     def test_pre_v04_run_is_read_only(self) -> None:
         with self.assertRaisesRegex(ValueError, "read/export-only"):

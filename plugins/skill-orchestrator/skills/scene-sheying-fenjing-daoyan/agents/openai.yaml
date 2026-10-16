@@ -1,0 +1,4 @@
+interface:
+  display_name: "摄影分镜导演"
+  short_description: "规划摄影、机位、焦段、运动、覆盖与镜头表"
+policy: {allow_implicit_invocation: false}

@@ -1,31 +1,40 @@
-# v0.4 quality status
+# v0.8.0 质量状态
 
-## Automated scope
+以下是 2026-10-16 为 v0.8.0 发布完成的验证。使用 Codex 提供的 Python 3.12 和哈希锁定运行时，材料为合成数据、临时文件和确定性假 Agent。
 
-- Offline deterministic Agent and fake App Server paths require no account, network, Codex turn, or image-generation fee.
-- Tests cover V2 protocols, event replay, duplicate events, graph validation, concurrency, timeout, cancellation, retry, lease recovery, incremental DAG patching, three confirmation gates, single-asset enforcement, pure-environment boundaries, invariant visibility, old-package read-only behavior, and forbidden output fields.
-- Prompt gold contains 36 sealed-contract scenarios: 16 character, 12 pure environment, and 8 hero prop.
-- Every Skill and `agents/openai.yaml` is validated independently; the plugin manifest and repository marketplace are validated as a bundle.
+## 已通过
 
-## Capability status
+| 检查 | 结果 | 覆盖重点 |
+| --- | --- | --- |
+| 主测试套件 `tests/` | **135 项通过** | 概念需求来源与封存、设计书发布与恢复、视觉上下文、调度事件与恢复、场景导演、知识管理、分镜正文、Seedance 编译 |
+| 剧本拆解套件 | **14 项通过** | 文本提取、稳定编号、版本比较、证据引用与结果校验 |
+| Agent Skills 规范校验 | **38 个通过** | 每个 SKILL 的名称、说明、正文与元数据 |
+| 岗位 YAML 与包配置 | **38 份 YAML、manifest 和 marketplace 通过** | 配置可解析、必要字段、插件版本和目录绑定 |
+| JSON 文件 | **全部可解析** | 契约、schema、目录和合成评测材料 |
 
-- Character master: primary production target; rendered-image evaluation pending.
-- Pure environment: primary production target; rendered-image evaluation pending.
-- Hero prop: supported, still experimental pending more real contracts.
-- Multi-view, narrative shot, state variant, failed-image repair, and image generation: deferred request types only.
+两项新增回归专门检查：参考 Excel 中的旧项目决定与来源不会被带入新输出；决定日志、场号、镜头覆盖数和知识激活情况来自当前输入。
 
-## Public validation boundary
+DOCX 测试检查单场标题、主镜与连续子镜号、无表格结构、对白一致性和封存哈希绑定。XLSX 测试检查中文表头、逐镜提示词、三层声音、机位段落与当前项目来源记录。
 
-The public repository reports only reproducible automated checks against synthetic fixtures and gold contracts. It intentionally excludes user screenplays, reference images, asset catalogs, concept requirements, generation prompts, run reports, and project-specific case studies. Repository `/outputs/` content is ignored by Git.
+## 重现测试
 
-Private development runs may be used to improve the implementation, but their titles, counts, characters, scene details, design decisions, prompts, hashes, and artifacts are not part of the public quality claim.
+先运行插件中 `skills/skill-orchestrator/scripts/bootstrap_runtime.py`，查看或准备哈希锁定依赖。使用脚本报告的 `runtime_path` 作为 `PYTHONPATH`，并使用 Codex 提供的 Python 3.12+ 执行：
 
-## Unperformed paid checks
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+python3 -m unittest discover -s plugins/skill-orchestrator/skills/ai-script-breakdown/tests -p 'test_*.py' -v
+```
 
-Normal plugin execution does not generate images. GPT Image rendered-output A/B evaluation requires separate usage authorization. The public release claim does not cover image-model adherence, unattended recovery across every failure mode, or long-run live concurrency stability.
+此处的 `python3` 应指向上述 Codex Python；不要退回不受支持的旧版系统 Python。运行测试不需要真实模型、图片或视频生成。
 
-The render gate uses one real character and one real pure-environment contract, two images per final prompt, zero hard-boundary violations, mean contract adherence of at least 4/5, and at least 3/4 images judged first-pass usable. At least two reviewers score anonymously; a difference greater than one point adds a third reviewer.
+## 公开验证范围
 
-## Local observability
+公开版本仅报告可复现的自动检查。人物和纯环境概念为主要设计目标，核心道具仍标为实验能力。场景导演一次处理同一剧本中的 1–2 场，默认输出分镜正文 DOCX；Seedance XLSX 通过独立显式步骤生成。
 
-Each run records scheduling latency, retries, hard timeouts, orphan-lease recovery, deadlock detection, degradation, graph versions, approvals, artifact hashes, and node attempts in the project-local event database. Audit exports are redacted. No telemetry backend is included.
+本轮没有运行真实图像或视频生成，没有进行模型输出效果评测、全量文档视觉排版评审或长时间真实多 Agent 稳定性验证。自动测试通过不等于模型一定遵循提示词，也不构成对创作效果的保证。
+
+公开包排除私人剧本、参考图、资产需求、运行报告、课程原文、转换全文和真实审定记录。知识目录以空模板提供，通用规则不携带项目案例。公开发布提交以既有公开历史为父提交，避免传播包含私人材料的本地开发历史。
+
+## 本地运行记录
+
+通用运行时在项目本地记录事件、任务状态、租约、重试、图版本、确认和产物哈希，用于本机进程级恢复。插件不包含独立遥测后端；日志不会因为一次运行结束而自动删除。

@@ -1,15 +1,15 @@
 {
   "name": "skill-orchestrator",
-  "version": "0.4.0+codex.20260901025748",
-  "description": "Turn a screenplay and references into one sealed visual asset, an expert-reviewed visual spec, and one evidence-bound Chinese OpenAI image prompt.",
+  "version": "0.8.0",
+  "description": "Analyze screenplays, direct verified scenes, and compile sealed shots into one-shot-per-paragraph Chinese DOCX documents.",
   "author": {
     "name": "eggshrt"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Skill Orchestrator",
-    "shortDescription": "From a full screenplay to one controlled visual asset and prompt.",
-    "longDescription": "An evidence-first visual-development pipeline for Codex. It analyzes a screenplay, limits user references to declared responsibilities, seals exactly one character, environment, scene state, or hero prop, and coordinates independent experts through a recoverable DAG. Three confirmation gates protect intent before one Chinese OpenAI-first master prompt is written. It does not generate images, model parameters, a separate negative prompt, or a second asset.",
+    "shortDescription": "Evidence-first screenplay direction with one-shot-per-paragraph DOCX delivery.",
+    "longDescription": "An evidence-first screenplay and directing pipeline for Codex. The prompt-free scene director seals structured decisions, then a dedicated prose compiler renders one shot or subshot per Chinese paragraph in a table-free DOCX. Legacy XLSX materialization and the separate explicit Seedance compiler remain available without entering the default director workflow.",
     "developerName": "eggshrt",
     "category": "Productivity",
     "capabilities": [
@@ -22,8 +22,14 @@
       "Single-asset concept direction",
       "Image prompt team",
       "Visual prompt specification",
-      "Three-gate creative approval"
+      "Three-gate creative approval",
+      "Scene directing and performance blocking",
+      "Storyboard shot-list design",
+      "Continuity and execution risk review",
+      "User-gated director knowledge publishing",
+      "One-shot-per-paragraph Chinese DOCX compilation",
+      "Seedance 2.0 sealed-shot prompt compilation"
     ],
-    "defaultPrompt": "Use $screenplay-concept-director to analyze my screenplay and seal exactly one visual asset, stopping at every confirmation gate. After the requirement is sealed, use $image-prompt-team to produce one confirmed visual specification and one Chinese OpenAI-first master prompt without generating an image."
+    "defaultPrompt": "Use $ai-script-breakdown to establish stable screenplay evidence, $screenplay-scene-daoyanzu for prompt-free scene direction, and $screenplay-shot-prose-compiler for the default one-shot-per-paragraph DOCX. Invoke $seedance-shot-prompt-compiler only as an explicit downstream step."
   }
 }

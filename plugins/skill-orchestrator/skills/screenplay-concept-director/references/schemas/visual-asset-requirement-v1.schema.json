@@ -2,24 +2,528 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "VisualAssetRequirementV1",
   "type": "object",
-  "required": ["schema_version", "version", "baseline_ref", "asset", "primary_state", "derived_states", "design_dimensions", "evidence", "high_impact_decisions", "reference_images", "production_constraints", "cultural_boundaries", "invariants", "exclusions", "acceptance_criteria", "open_questions", "confirmations"],
+  "required": [
+    "schema_version",
+    "version",
+    "baseline_ref",
+    "asset",
+    "primary_state",
+    "derived_states",
+    "design_dimensions",
+    "evidence",
+    "high_impact_decisions",
+    "reference_images",
+    "production_constraints",
+    "cultural_boundaries",
+    "invariants",
+    "exclusions",
+    "acceptance_criteria",
+    "open_questions",
+    "confirmations",
+    "contract_revision",
+    "creative_position_hash",
+    "integrity",
+    "dependency_assets",
+    "persistence_plan"
+  ],
   "properties": {
-    "schema_version": {"const": "VisualAssetRequirementV1"},
-    "version": {"type": "string", "pattern": "^v[1-9][0-9]*$"},
-    "baseline_ref": {"type": "object", "required": ["project_id", "draft_id", "source_hash", "breakdown_hash", "analyzer_hash", "context_hash"], "properties": {"source_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "breakdown_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "analyzer_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
-    "asset": {"type": "object", "required": ["asset_id", "asset_type", "name"], "properties": {"asset_id": {"type": "string", "minLength": 1}, "asset_type": {"enum": ["character_master", "location_master", "scene_state", "hero_prop"]}, "name": {"type": "string", "minLength": 1}}},
-    "primary_state": {"type": "object", "required": ["state_id", "asset_id", "label", "design_direction", "design_language", "concrete_elements"]},
-    "derived_states": {"type": "array", "items": {"type": "object", "required": ["state_id", "asset_id", "label", "delta_from", "changes", "source_refs"]}},
-    "design_dimensions": {"type": "object", "required": ["shared", "type_specific"], "properties": {"shared": {"type": "object", "minProperties": 1}, "type_specific": {"type": "object", "minProperties": 1}}},
-    "evidence": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["kind", "statement", "source_refs"], "properties": {"kind": {"enum": ["fact", "inference", "design_decision", "preference", "unknown"]}, "statement": {"type": "string", "minLength": 1}, "source_refs": {"type": "array", "items": {"type": "string"}}}}},
-    "high_impact_decisions": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["chosen_option", "status"], "properties": {"chosen_option": {"type": "string", "minLength": 1}, "status": {"enum": ["accepted", "user_override"]}}}},
-    "reference_images": {"type": "array", "items": {"type": "object", "required": ["source", "controls", "must_not_control"], "properties": {"source": {"const": "user_provided"}, "controls": {"type": "array", "minItems": 1}, "must_not_control": {"type": "array", "minItems": 1}}}},
-    "production_constraints": {"type": "array", "minItems": 1},
-    "cultural_boundaries": {"type": "array"},
-    "invariants": {"type": "array", "minItems": 1},
-    "exclusions": {"type": "array", "minItems": 1},
-    "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "criterion", "method"]}},
-    "open_questions": {"type": "array", "maxItems": 0},
-    "confirmations": {"type": "array", "minItems": 3}
+    "schema_version": {
+      "const": "VisualAssetRequirementV1"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v[1-9][0-9]*$"
+    },
+    "baseline_ref": {
+      "type": "object",
+      "required": [
+        "project_id",
+        "draft_id",
+        "source_hash",
+        "breakdown_hash",
+        "analyzer_hash",
+        "context_hash"
+      ],
+      "properties": {
+        "source_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "breakdown_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "analyzer_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "context_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "draft_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "required": [
+        "asset_id",
+        "asset_type",
+        "name"
+      ],
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_type": {
+          "enum": [
+            "character_master",
+            "location_master",
+            "scene_state",
+            "hero_prop"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "primary_state": {
+      "type": "object",
+      "required": [
+        "state_id",
+        "asset_id",
+        "label",
+        "design_direction",
+        "design_language",
+        "concrete_elements"
+      ],
+      "properties": {
+        "state_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "design_direction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "design_language": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "concrete_elements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "derived_states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "state_id",
+          "asset_id",
+          "label",
+          "delta_from",
+          "changes",
+          "source_refs"
+        ],
+        "properties": {
+          "state_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asset_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "delta_from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          }
+        }
+      },
+      "minItems": 0
+    },
+    "design_dimensions": {
+      "type": "object",
+      "required": [
+        "shared",
+        "type_specific"
+      ],
+      "properties": {
+        "shared": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "type_specific": {
+          "type": "object",
+          "minProperties": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "statement",
+          "source_refs"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "fact",
+              "inference",
+              "design_decision",
+              "preference",
+              "unknown"
+            ]
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "high_impact_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "topic",
+          "chosen_option",
+          "status",
+          "consequence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1
+          },
+          "chosen_option": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "accepted",
+              "user_override"
+            ]
+          },
+          "consequence": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "reference_images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "path",
+          "sha256",
+          "controls",
+          "must_not_control"
+        ],
+        "properties": {
+          "source": {
+            "const": "user_provided"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "controls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "must_not_control": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "minItems": 0
+    },
+    "production_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "cultural_boundaries": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "criterion",
+          "method"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "criterion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "open_questions": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "confirmations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gate",
+          "confirmed",
+          "confirmed_at",
+          "confirmed_by",
+          "message_ref",
+          "content_hash"
+        ],
+        "properties": {
+          "gate": {
+            "enum": [
+              "asset_selection",
+              "design_requirement",
+              "persistence_plan"
+            ]
+          },
+          "confirmed": {
+            "const": true
+          },
+          "confirmed_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed_by": {
+            "const": "user"
+          },
+          "message_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "contract_revision": {
+      "const": 2
+    },
+    "creative_position_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "integrity": {
+      "type": "object",
+      "required": [
+        "requirement_hash"
+      ],
+      "properties": {
+        "requirement_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "dependency_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ref_asset_id",
+          "asset_type",
+          "version",
+          "requirement_path",
+          "requirement_hash"
+        ],
+        "properties": {
+          "ref_asset_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asset_type": {
+            "enum": [
+              "location_master",
+              "character_master",
+              "hero_prop"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requirement_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "minItems": 0
+    },
+    "persistence_plan": {
+      "type": "object",
+      "required": [
+        "output_root",
+        "files",
+        "validators"
+      ],
+      "properties": {
+        "output_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "design_book_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "validators": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "output_scope": {
+      "enum": [
+        "pure_environment",
+        "single_asset"
+      ]
+    }
   }
 }
