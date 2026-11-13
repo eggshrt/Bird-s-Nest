@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.0 (2026-11-13)
+
+- `skill-orchestrator` 1.3.0: 用户语言层改写：内部术语隐藏、进度通知自然语言化
+- `chinese-intent-clarifier` 1.3.0: 用户语言层改写：内部术语隐藏、进度通知自然语言化
+
 ## 0.11.0 (2026-11-13)
 
 - `skill-orchestrator` 1.2.0: 知识库强制加载五层防护；post_install 符号链接脚本

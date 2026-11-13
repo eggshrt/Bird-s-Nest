@@ -16,6 +16,8 @@ Require explicit `$skill-orchestrator` invocation. One invocation covers follow-
 
 Pick a tier by the first matching rule, state it in one sentence with the signal that decided it, and proceed. The user may change it.
 
+**进度通知格式**（每档均适用）：档位选定后，第一条消息说明任务概要、涉及岗位/步骤数量和预计时间，例如"好的，我来帮你[用一句话描述任务]。这需要[N个岗位/步骤]，大概[X分钟]。"每个步骤开始时告知"正在[做什么]…"，完成时告知"[这步的产出]已完成。"遇到需用户确认的问题时，说明具体情况并问一个明确问题。用户侧可见输出中禁止出现：council_cNNN、record_id、schema_version、native_agent、inline、executor、node_001等节点ID、run_rNNN、RunReportV2、AgentResultV1、AgentTaskV1、任何十六进制哈希值、"此任务需依据知识库"等内部标注。
+
 1. **Formal** if any holds: the request says 封存/正式/交付包/导演包/提示词包/seal; the target is a sealed type (`visual_asset_requirement_v1`, `scene_direction_package_v1`, `image_prompt_package_v2`), a DOCX/XLSX, or a compiler input; any side effect is involved; a sealed artifact would change.
 2. **Standard** if two or more roles must give independent positions, or a real cross-role conflict needs adjudication.
 3. **Light** if all hold: one role Skill; no side effect beyond an optional marked draft; an existing alignment record is readable, or the user-supplied material is self-contained.
@@ -30,17 +32,17 @@ Light is never allowed for: a sealing or formal request; any side effect; no ali
 Read the alignment record and later user decisions, load the one role Skill body, and answer in the controller thread. Do not load `$grill-me`, re-interview, rebuild the index, show a graph, create a run, or start an Agent. Ask only about new facts that change this answer, at most three.
 
 - Open the reply with one line: tier, role Skill, alignment record read.
-- Label the output `未封存建议`. Separate user-confirmed facts, observations, and unconfirmed inference. List changes to dialogue, plot, relationships, physical contact, or core blocking as proposals for the user.
-- Save only on request, as a new version whose header is `advisory_note_v1`: tier, role Skill and version, alignment record path and sha256, date, `status: proposed`, `sealed: false`. Never overwrite a source or confirmed version, and never name the file a package.
+- 在开头用括号标注「草稿建议，未正式封存」. Separate user-confirmed facts, observations, and unconfirmed inference. List changes to dialogue, plot, relationships, physical contact, or core blocking as proposals for the user.
+- Save only on request, as a new draft version recording: tier, role Skill and version, alignment record path and hash, date, proposed status, not sealed. Never overwrite a source or confirmed version, and never name the file a package.
 - Never call the result a council, a multi-role consultation, or a package.
 
 ## Standard
 
-Confirm scope in one short exchange (shots, question, roles, what is out of scope), reusing settled project context. Start one native Agent per selected role, at most three in parallel, each with a task-bounded context projection and a private output file; roles do not interview the user. One targeted rebuttal per real conflict; no voting. The controller synthesizes and labels the result `未封存会诊建议`.
+Confirm scope in one short exchange (shots, question, roles, what is out of scope), reusing settled project context. Start one Agent per selected role, at most three in parallel, each with a task-bounded context projection and a private output file; roles do not interview the user. One targeted rebuttal per real conflict; no voting. The controller synthesizes and labels the result 「多岗位会诊草稿，未正式封存」.
 
-Write one `council_record_v1` under `council_cNNN/`: `schema`, `tier`, `record_id`, `created_at`, `scope` with the user's confirming text, `alignment_inputs` (path, sha256), `roles` (role Skill, version, `executor: native_agent|inline`, agent id, position path, sha256), `synthesis` (path, sha256), `user_confirmed`, `proposed`, `open_conflicts`, `not_done`, `status: proposed`, `sealed: false`, `scheduler_used: false`. A role the controller ran itself is recorded as `inline`, never as an independent Agent.
+在工作目录里保存一份会诊记录，包含：档位、创建时间、范围（含用户确认原文）、对齐输入（路径与哈希）、各岗位信息（岗位技能与版本、执行方式、代理标识、产出路径与哈希）、综合结论（路径与哈希）、用户确认状态、建议内容、未决冲突、未完成项、状态标记为草稿且未封存。一个由控制器自身执行的岗位记录为内部执行，不作为独立代理。用户侧可见输出中不出现内部字段名、目录名或节点标识。
 
-Light and Standard never write `RunReportV2`, `status: sealed`, a canonical package hash, `approved`, a dispatcher signature, or a `run_rNNN/` directory. Promotion to Formal starts at gate 1; lower-tier output enters only as `agent_added_context`.
+Light and Standard never produce a formal sealed run report, a canonical package hash, an approval marker, a dispatcher signature, or a numbered run directory. Promotion to Formal starts at gate 1; lower-tier output enters only as added context.
 
 ## Formal: hard gates
 
@@ -61,7 +63,7 @@ Maintain one canonical collaboration context with `shared_known`, `user_context_
 
 **Knowledge base mandatory loading rule**:
 - When the requirement is identified as asset design (character styling, scene, prop), **must** include the corresponding asset plugin's `knowledge/` directory content in context projection
-- Agent receives task.json **must** explicitly mark "this task requires knowledge base"
+- Agent receives its task file **must** explicitly mark the knowledge-base requirement internally; this marking is not shown to the user
 - Output **must** include knowledge base citation tracking
 
 ## Retrieval
