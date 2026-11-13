@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.1 (2026-11-13)
+
+- `ai-script-breakdown` 1.1.0: Plan Mode门禁加操作指引；视频提示词时长分段模板；角色定妆通用模板；chinese-intent-clarifier精简至阈值内
+- `chinese-intent-clarifier` 1.4.0: Plan Mode门禁加操作指引；视频提示词时长分段模板；角色定妆通用模板；chinese-intent-clarifier精简至阈值内
+- `seedance-shot-prompt-compiler` 1.1.0: Plan Mode门禁加操作指引；视频提示词时长分段模板；角色定妆通用模板；chinese-intent-clarifier精简至阈值内
+
 ## 0.12.0 (2026-11-13)
 
 - `skill-orchestrator` 1.3.0: 用户语言层改写：内部术语隐藏、进度通知自然语言化

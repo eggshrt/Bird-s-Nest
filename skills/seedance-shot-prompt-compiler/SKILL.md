@@ -22,7 +22,16 @@ metadata:
 
 ## 编译方法
 
-开始写提示词前读取 [prompt-rules.md](references/prompt-rules.md)；需要补充表演节拍或动作链时再读取 [performance-action-rules.md](references/performance-action-rules.md)。每镜从导演包投影：
+开始写提示词前读取 [prompt-rules.md](references/prompt-rules.md)；需要补充表演节拍或动作链时再读取 [performance-action-rules.md](references/performance-action-rules.md)。
+
+**时长分段格式（必须包含）**：
+每段视频提示词必须标注内部节拍时间戳，格式：
+- 0-3秒：[动作描述]
+- 3-6秒：[动作描述]
+- 6-10秒：[动作描述]
+（分段时间之和必须等于总时长，不得有间隙或重叠）
+
+每镜从导演包投影：
 
 - 表演调度：动作力度、姿态、停顿、呼吸、目光与可见微表情。
 - 摄影分镜：景别、角度、机位、焦段、一个主要运镜及结束构图。

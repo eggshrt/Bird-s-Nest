@@ -10,7 +10,9 @@ Turn a screenplay into evidence-linked creative and production decisions using a
 ## Two-stage gate
 
 1. Determine the actual Codex collaboration mode from system or developer context. A user's statement that they are in Plan Mode is not sufficient.
-2. If this is a first-time invocation outside Plan Mode, reply only: `请先切换到计划模式，然后重新调用 $ai-script-breakdown 并上传剧本。当前不会开始拆解或写入文件。` Then stop.
+2. If this is a first-time invocation outside Plan Mode, reply only: `请先切换到计划模式，然后重新调用 $ai-script-breakdown 并上传剧本。当前不会开始拆解或写入文件。`
+   提示：在 Codex 中点击右上角的「计划」按钮（或在对话输入框前加 `/plan`），然后重新发送你的请求。
+   Then stop.
 3. In Plan Mode, inspect the source read-only, audit extraction quality, confirm scope and role contracts, and produce a decision-complete execution plan. Do not write deliverables.
 4. Outside Plan Mode, execute only when the current conversation contains the approved breakdown plan and the user explicitly asks to execute it. Otherwise return to step 2.
 
