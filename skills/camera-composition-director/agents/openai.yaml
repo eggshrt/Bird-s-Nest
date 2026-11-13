@@ -1,0 +1,6 @@
+interface:
+  display_name: "Camera and Composition Director"
+  short_description: "Makes framing consequences observable"
+  default_prompt: "Use $camera-composition-director only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

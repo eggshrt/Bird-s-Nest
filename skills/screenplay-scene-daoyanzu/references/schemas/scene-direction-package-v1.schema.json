@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "SceneDirectionPackageV1", "type": "object",
+  "required": ["schema_version", "package_id", "version", "status", "requirement", "chief_direction", "scenes", "decision_log", "source_trace", "integrity"],
+  "properties": {
+    "schema_version": {"const": "SceneDirectionPackageV1"}, "package_id": {"type": "string"}, "version": {"type": "string"}, "status": {"enum": ["draft", "sealed"]},
+    "requirement": {"type": "object"}, "chief_direction": {"type": "object"},
+    "scenes": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"type": "object", "required": ["scene_id", "production_scene_code", "title", "dramatic_function", "beats", "performance_blocking", "department_plans", "shots", "continuity", "execution_risks", "source_text"], "properties": {"scene_id": {"type": "string"}, "production_scene_code": {"type": "string"}, "shots": {"type": "array", "minItems": 1, "items": {"type": "object", "properties": {"shot_segments": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/shotSegment"}}}}}}}},
+    "bridge": {"type": ["object", "null"]}, "decision_log": {"type": "array"}, "source_trace": {"type": "array"},
+    "integrity": {"type": "object", "required": ["canonical_json_sha256"], "properties": {"canonical_json_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}}}
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "shotSegment": {
+      "type": "object",
+      "required": ["segment_id", "beat_ids", "evidence_refs", "framing", "angle", "camera_position", "movement", "subject_action", "performance_target", "dialogue", "sound", "last_state"],
+      "properties": {
+        "segment_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*S[0-9]{3}C[0-9]{3}-[1-9][0-9]*$"},
+        "beat_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "framing": {"type": "string", "minLength": 1},
+        "angle": {"type": "string", "minLength": 1},
+        "camera_position": {"type": "string", "minLength": 1},
+        "movement": {"type": "string", "minLength": 1},
+        "subject_action": {"type": "string", "minLength": 1},
+        "performance_target": {"type": "string", "minLength": 1},
+        "dialogue": {"type": "string"},
+        "sound": {"type": "string"},
+        "last_state": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  }
+}

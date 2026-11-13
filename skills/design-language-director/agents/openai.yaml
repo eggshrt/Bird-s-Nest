@@ -1,0 +1,6 @@
+interface:
+  display_name: "Design Language Director"
+  short_description: "Builds coherent shape and material grammar"
+  default_prompt: "Use $design-language-director only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

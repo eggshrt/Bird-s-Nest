@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CreativePositionV1",
+  "type": "object",
+  "required": ["schema_version", "asset_id", "claim", "evidence", "aesthetic_preference", "objections", "alternative", "risks", "confidence", "change_conditions", "decision_owner", "human_statement"],
+  "properties": {
+    "schema_version": {"const": "CreativePositionV1"},
+    "asset_id": {"type": "string", "minLength": 1},
+    "claim": {"type": "string", "minLength": 1},
+    "evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "aesthetic_preference": {"type": "string", "minLength": 1},
+    "objections": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "alternative": {"type": "string", "minLength": 1},
+    "risks": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "confidence": {"enum": ["high", "medium", "low"]},
+    "change_conditions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "decision_owner": {"const": "user"},
+    "human_statement": {"type": "string", "minLength": 1}
+  }
+}

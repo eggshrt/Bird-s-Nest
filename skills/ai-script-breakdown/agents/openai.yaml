@@ -1,0 +1,6 @@
+interface:
+  display_name: "AI 真人剧本拆解"
+  short_description: "面向全 AI 真人影视的多岗位可追溯专业剧本拆解工具"
+  default_prompt: "Use $ai-script-breakdown to plan and execute a traceable multi-role breakdown of my AI live-action screenplay."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,4 @@
+interface:
+  display_name: "创意导演"
+  short_description: "低权重提出不改写事实的非常规形式选择"
+policy: {allow_implicit_invocation: false}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DirectorPositionV1",
+  "type": "object",
+  "required": ["schema_version", "position_id", "role_id", "scene_ids", "claims", "evidence_refs", "assumptions", "risks", "conflicts", "recommendations", "confidence", "change_conditions"],
+  "properties": {
+    "schema_version": {"const": "DirectorPositionV1"},
+    "position_id": {"type": "string"}, "role_id": {"type": "string"},
+    "scene_ids": {"type": "array", "items": {"type": "string"}},
+    "claims": {"type": "array"}, "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "assumptions": {"type": "array"}, "risks": {"type": "array"}, "conflicts": {"type": "array"}, "recommendations": {"type": "array"},
+    "confidence": {"enum": ["high", "medium", "low"]}, "change_conditions": {"type": "array"}
+  },
+  "additionalProperties": true
+}

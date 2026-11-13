@@ -1,0 +1,6 @@
+interface:
+  display_name: "剧本场景导演组"
+  short_description: "把已拆解的 1–2 场剧本转化为经审定的导演、表演、分镜与现场执行包"
+  default_prompt: "使用 $screenplay-scene-daoyanzu，从已验证的 screenplay_breakdown_v1 中选择 1–2 场，完成两轮 Grill 并封存规范 JSON，再调度 $screenplay-shot-prose-compiler 生成一镜一段的中文 DOCX；仅在我明确要求时兼容输出 XLSX。"
+policy:
+  allow_implicit_invocation: true

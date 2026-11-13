@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visual Spec Assembler"
+  short_description: "Assembles one conflict-explicit visual spec"
+  default_prompt: "Use $visual-spec-assembler only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

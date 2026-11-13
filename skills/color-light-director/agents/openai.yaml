@@ -1,0 +1,6 @@
+interface:
+  display_name: "Color and Light Director"
+  short_description: "Controls color masses and motivated light"
+  default_prompt: "Use $color-light-director only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

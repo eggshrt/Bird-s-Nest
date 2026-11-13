@@ -1,0 +1,4 @@
+interface:
+  display_name: "DLSS 5式光照与材质增强"
+  short_description: "在保留原设计的前提下，深化光源、材质、介质与动态反馈并转为可见描述"
+  default_prompt: "使用 $dlss5-lighting-director 优化当前画面的光照与材质交互，保留已确定的身份、结构、运镜和动作，只给一套增强提示词。"

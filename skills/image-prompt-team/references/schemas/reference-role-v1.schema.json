@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReferenceRoleV1",
+  "type": "object",
+  "required": ["schema_version", "asset_id", "references"],
+  "properties": {
+    "schema_version": {"const": "ReferenceRoleV1"},
+    "asset_id": {"type": "string", "minLength": 1},
+    "references": {"type": "array", "items": {"type": "object", "required": ["reference_hash", "allowed_dimension", "forbidden_dimensions", "observations", "originality_checks"]}}
+  }
+}

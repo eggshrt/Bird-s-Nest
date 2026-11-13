@@ -1,0 +1,5 @@
+name: chinese-intent-clarifier
+model: gpt-4
+short_description: "中文影视需求的意图识别与澄清"
+default_prompt: "用 $chinese-intent-clarifier 解析我的中文需求，识别意图类型，补全槽位，只问真正必要的问题，输出结构化需求和执行计划。"
+allow_implicit_invocation: false

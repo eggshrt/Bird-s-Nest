@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DagPatchV1",
+  "type": "object",
+  "required": ["schema_version", "run_id", "base_graph_version", "operations", "invalidated_nodes", "semantic_impact", "evidence", "confirmation_required"],
+  "properties": {"schema_version": {"const": "DagPatchV1"}, "run_id": {"type": "string"}, "base_graph_version": {"type": "integer"}, "operations": {"type": "array"}, "invalidated_nodes": {"type": "array", "items": {"type": "string"}}, "semantic_impact": {"enum": ["low", "high", "contract_change"]}, "evidence": {"type": "array"}, "confirmation_required": {"type": "boolean"}}
+}

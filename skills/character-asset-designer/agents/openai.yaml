@@ -1,0 +1,6 @@
+interface:
+  display_name: "Character Asset Designer"
+  short_description: "Audits character-master visual completeness"
+  default_prompt: "Use $character-asset-designer only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

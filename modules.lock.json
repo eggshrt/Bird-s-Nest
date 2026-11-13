@@ -1,0 +1,206 @@
+{
+  "schema_version": "ModuleLockV1",
+  "plugin_version": "0.10.0",
+  "modules": {
+    "adversarial-reviewer": {
+      "version": "1.0.0",
+      "tree_sha256": "0fc6638002e65196e39af309ce3ab13c72db0b5b244b75f2c2b0f0c3404aca43",
+      "files": 2
+    },
+    "ai-script-breakdown": {
+      "version": "1.0.0",
+      "tree_sha256": "4c766ca13d707f365bcbedd037a3b51ebdb68aca083c536adfd52c26d22aca66",
+      "files": 23
+    },
+    "camera-composition-director": {
+      "version": "1.0.0",
+      "tree_sha256": "206d9514234613c13f10a7148ce81ece00dc63919fae69f848a3f417ab1d1ae2",
+      "files": 2
+    },
+    "character-asset-designer": {
+      "version": "1.0.0",
+      "tree_sha256": "511d6d05c8612ad03dec0725b47453e01e944f852d1280c16c13cf830ea07047",
+      "files": 2
+    },
+    "chinese-intent-clarifier": {
+      "version": "1.0.0",
+      "tree_sha256": "9a4d273341fa353f3843ad2e991337af076b6749b1bb93013b9df7e72369391a",
+      "files": 2
+    },
+    "color-light-director": {
+      "version": "1.0.0",
+      "tree_sha256": "1755a20281531739c764ff35636d6a1d07b7eafe201427184f6f48edffffaf88",
+      "files": 2
+    },
+    "design-language-director": {
+      "version": "1.0.0",
+      "tree_sha256": "fc46bb690b440398e83193c9d4e16be3c7335daf82fd26ead1099fe894d6a8de",
+      "files": 2
+    },
+    "director-knowledge-manager": {
+      "version": "1.0.0",
+      "tree_sha256": "aae6b2c16d492119a7892d5edc7a0871d6df2215cca148f74f6d8a23832d1872",
+      "files": 11
+    },
+    "dlss5-lighting-director": {
+      "version": "1.0.0",
+      "tree_sha256": "2740f7a77514665ed1cd0ace10d6599088b28ba0c5d80ab485ec5f9bd26a7b09",
+      "files": 5
+    },
+    "environment-asset-designer": {
+      "version": "1.0.0",
+      "tree_sha256": "1cb0cac918dc05be32c8963c9e704d7c9df569bc073d38ae4a96ac6494866c69",
+      "files": 2
+    },
+    "evidence-guardian": {
+      "version": "1.0.0",
+      "tree_sha256": "528e63d2865f9ea8934a34bfa5038e8d962f34811a3b8e4428da4d09a938719b",
+      "files": 2
+    },
+    "grill-me": {
+      "version": "1.0.0",
+      "tree_sha256": "6304c3ccb222cc264ec739ba6ab50ef66c43d261a2d93056e8cdebaa4ac39735",
+      "files": 2
+    },
+    "image-prompt-team": {
+      "version": "1.0.0",
+      "tree_sha256": "b7f648a93294409487212dea5f06862999420cf6610b2c2c50a1800bd6515889",
+      "files": 14
+    },
+    "motif-curator": {
+      "version": "1.0.0",
+      "tree_sha256": "9fc993801e152eccf58c88e92f78842fbe97419251ed339a873b36cad4a3f81c",
+      "files": 2
+    },
+    "openai-image-prompt-compiler": {
+      "version": "1.0.0",
+      "tree_sha256": "5b9fc3a6ed0d159a518931cf74af5f50a050eff8021f6d5de554d5d2ae38d476",
+      "files": 2
+    },
+    "prompt-architect": {
+      "version": "1.0.0",
+      "tree_sha256": "f1ca44eebc3b8e69f0e90f3b560ba8b3f2a11ede5b7e19e3eec1a9f3cbf9494b",
+      "files": 2
+    },
+    "prompt-salience-editor": {
+      "version": "1.0.0",
+      "tree_sha256": "f23eadc744e70b5d005e7d57f65e1b7269ccdd779ea729e6285eece14a76ebb4",
+      "files": 2
+    },
+    "prop-asset-designer": {
+      "version": "1.0.0",
+      "tree_sha256": "0d98b5f4c79216943d02e32f51dd2b57ac0d97cb60abb05c26824185ab0dd625",
+      "files": 2
+    },
+    "reference-role-director": {
+      "version": "1.0.0",
+      "tree_sha256": "572225b8a031074f5eee6948c4d4731e3986c8090beb63161814d986d5a20ac0",
+      "files": 2
+    },
+    "scene-biaoyan-diaodu-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "d2a7caac22e187f9e887bd5f4b5eeb06fea64e2ddd43557b7e059f4565ebe0c7",
+      "files": 3
+    },
+    "scene-chuangyi-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "18eeb734d220e399aee590dd1a1d1c4e61a058950c2494ba5ba29b15c94a8619",
+      "files": 3
+    },
+    "scene-dengguang-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "1a08356463935d2995afc8a397bc425e249c30f1c36231f0e19dd852028d617b",
+      "files": 3
+    },
+    "scene-dongzuo-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "9ceba1a76b4cb001d821a113451a88ddb8f2ec7c9ceac0efc73d4b13472c9f6a",
+      "files": 3
+    },
+    "scene-lianxuxing-zhixing-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "78d120a495a0dcecf26a1c82ff30226a973c6b209b4d8aa711a812e392fba73d",
+      "files": 3
+    },
+    "scene-shengyin-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "3670a87528b1203280e68b8864c13d2f62425100894e275864eae77d79fdbe13",
+      "files": 3
+    },
+    "scene-sheying-fenjing-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "89b32c5aacef7d7b4f6515c38ffe1b38215d940dbd58f0531b1ef325ccac7686",
+      "files": 3
+    },
+    "scene-taici-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "fcf0bc4ce76de25c40ace2ae09fe559767b0b4fd585823ddaf42b3c21a74409d",
+      "files": 3
+    },
+    "scene-texiao-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "501d4c351869384ff7e3067c9c8318ac7fc71034814429930b57367d010811ae",
+      "files": 3
+    },
+    "scene-tiaose-daoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "873fdedf6d08c3b74f7b15d8d2a8fa4660cb9059b504116ccaa04301235cdaaa",
+      "files": 3
+    },
+    "scene-zongdaoyan": {
+      "version": "1.0.0",
+      "tree_sha256": "e0bf16941463a2b71c9569ff9124a3d088fcf0ff222e9acbaede0c6b842e06db",
+      "files": 3
+    },
+    "screenplay-concept-director": {
+      "version": "1.0.0",
+      "tree_sha256": "2dc1fa244cdb7eb3c410fd42f005f03e14e2f778ef23b778811448cdc924f30b",
+      "files": 13
+    },
+    "screenplay-scene-daoyanzu": {
+      "version": "1.0.0",
+      "tree_sha256": "348d166c5881af69d99f056ce1656eea62956cf8b47239d9e26c7a3884ff6d35",
+      "files": 14
+    },
+    "screenplay-shot-prose-compiler": {
+      "version": "1.0.0",
+      "tree_sha256": "30079d9f26f239f7dbc9b08da03d869f54498e5f849bdf9946fbe415d276ba64",
+      "files": 5
+    },
+    "seedance-shot-prompt-compiler": {
+      "version": "1.0.0",
+      "tree_sha256": "ff1eeb8ac7ebb849f846ec58e7a8790f1903ed8f3a8793d4ab7fd068c7f357cf",
+      "files": 6
+    },
+    "skill-orchestrator": {
+      "version": "1.1.0",
+      "tree_sha256": "e390fce652535a564af6a9c8954f7d71df8da664dae0757016288e06456af266",
+      "files": 21
+    },
+    "synthesis-adjudicator": {
+      "version": "1.0.0",
+      "tree_sha256": "f8c137f1826240c3171caa63abe36728ec6a3973b4aba7f8dc353f964a13a14a",
+      "files": 2
+    },
+    "visual-brief-director": {
+      "version": "1.0.0",
+      "tree_sha256": "db092158355089d56f5bc057dce4584f329ed706beaab51352bf89c071761750",
+      "files": 2
+    },
+    "visual-hierarchy-director": {
+      "version": "1.0.0",
+      "tree_sha256": "4663c0cd5ba211302b79f1332f026736eb0182523d251444168af4d7b4a80532",
+      "files": 2
+    },
+    "visual-production-critic": {
+      "version": "1.0.0",
+      "tree_sha256": "90cf7aaae138a583e8460d95a7ff81d0c401c1c88cbf2f61350c4f6d944a91b4",
+      "files": 2
+    },
+    "visual-spec-assembler": {
+      "version": "1.0.0",
+      "tree_sha256": "24f96a1adb0c402a61e30fb7d594b835ab9ae8da95eac3403b553f3fab0aac7b",
+      "files": 2
+    }
+  }
+}

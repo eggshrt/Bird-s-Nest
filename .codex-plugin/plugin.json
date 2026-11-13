@@ -1,0 +1,39 @@
+{
+  "name": "skill-orchestrator",
+  "version": "0.10.0",
+  "description": "Tiered orchestration for screenplay production Skills: quick single-role advice, scoped role councils, and sealed, recoverable multi-Agent runs. Includes screenplay breakdown, scene direction, prompt compilation, and a capability registry for other installed plugins.",
+  "author": {
+    "name": "eggshrt"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Skill Orchestrator",
+    "shortDescription": "Tiered screenplay direction: quick advice, role councils, and sealed multi-Agent runs.",
+    "longDescription": "An evidence-first screenplay and directing pipeline for Codex. The prompt-free scene director seals structured decisions, then a dedicated prose compiler renders one shot or subshot per Chinese paragraph in a table-free DOCX. Legacy XLSX materialization and the separate explicit Seedance compiler remain available without entering the default director workflow. Local v0.8.1 adds shared lighting/material enhancement and causal prompt translation; no NVIDIA rendering integration. Local v0.8.2 makes the Skill index pick each plugin's highest cached version and skip vendored copies; only the 12 index unit tests were run. User trial build; no sample, runtime, or effect tests executed. Local v0.9.0 adds three entry tiers (Light, Standard, Formal), layered capability registries that give other plugins' Skills domains and types, a code-enforced dynamic-expert gate, and a bundled native bridge that replaces per-run hand-written bridges. Index, registry, and bridge unit tests were run; no model-driven end-to-end run was executed.",
+    "developerName": "eggshrt",
+    "category": "Productivity",
+    "capabilities": [
+      "Requirement alignment",
+      "Local skill retrieval",
+      "DAG planning",
+      "Recoverable Agent execution",
+      "SQLite event replay",
+      "Screenplay breakdown",
+      "Single-asset concept direction",
+      "Image prompt team",
+      "Visual prompt specification",
+      "Three-gate creative approval",
+      "Scene directing and performance blocking",
+      "Storyboard shot-list design",
+      "Continuity and execution risk review",
+      "User-gated director knowledge publishing",
+      "One-shot-per-paragraph Chinese DOCX compilation",
+      "Seedance 2.0 sealed-shot prompt compilation",
+      "DLSS 5-style lighting and material enhancement planning",
+      "Three entry tiers",
+      "Capability registry and domain packs",
+      "Bundled native collaboration bridge"
+    ],
+    "defaultPrompt": "Use $skill-orchestrator and state the tier you chose: Light for unsealed single-role advice, Standard for a scoped role council, Formal for a sealed run. Use $ai-script-breakdown to establish stable screenplay evidence, $screenplay-scene-daoyanzu for prompt-free scene direction, and $screenplay-shot-prose-compiler for the default one-shot-per-paragraph DOCX. Invoke $seedance-shot-prompt-compiler only as an explicit downstream step. Use $dlss5-lighting-director for scoped lighting/material enhancement of an existing image or video prompt."
+  }
+}

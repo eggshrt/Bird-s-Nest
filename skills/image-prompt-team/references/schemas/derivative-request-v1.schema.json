@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DerivativeRequestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "asset_id", "visual_prompt_spec_hash", "derivative_type", "requested_change", "preserved_invariants", "status"],
+  "properties": {
+    "schema_version": {"const": "DerivativeRequestV1"},
+    "asset_id": {"type": "string", "minLength": 1},
+    "visual_prompt_spec_hash": {"type": "string", "minLength": 1},
+    "derivative_type": {"enum": ["multi_view", "narrative_shot", "state_variant", "repair", "image_generation"]},
+    "requested_change": {"type": "string", "minLength": 1},
+    "preserved_invariants": {"type": "array", "items": {"type": "string"}},
+    "status": {"const": "deferred"}
+  }
+}

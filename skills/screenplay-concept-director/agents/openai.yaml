@@ -1,0 +1,6 @@
+interface:
+  display_name: "Screenplay Concept Director"
+  short_description: "Align one screenplay asset into a production-ready concept brief"
+  default_prompt: "Use $screenplay-concept-director to align one screenplay character, location, scene state, or hero prop."
+policy:
+  allow_implicit_invocation: false

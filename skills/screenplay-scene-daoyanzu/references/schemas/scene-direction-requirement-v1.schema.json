@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SceneDirectionRequirementV1",
+  "type": "object",
+  "required": ["schema_version", "requirement_id", "project_id", "screenplay_hash", "breakdown_hash", "scene_ids", "production_scene_map", "shot_numbering", "goal", "audience", "collaboration_context", "constraints", "active_roles", "acceptance_criteria", "initial_confirmation"],
+  "properties": {
+    "schema_version": {"const": "SceneDirectionRequirementV1"},
+    "requirement_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "screenplay_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "breakdown_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "scene_ids": {"type": "array", "minItems": 1, "maxItems": 2, "uniqueItems": true, "items": {"pattern": "^scn-[0-9]{3,}$"}},
+    "production_scene_map": {"type": "object", "minProperties": 1, "maxProperties": 2, "additionalProperties": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*S[0-9]{3}$"}},
+    "shot_numbering": {"type": "object", "required": ["pattern", "reset_per_scene"], "properties": {"pattern": {"const": "{production_scene_code}C{sequence:03d}"}, "reset_per_scene": {"const": true}}},
+    "goal": {"type": "string", "minLength": 1},
+    "audience": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "collaboration_context": {"type": "object"},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "active_roles": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"type": "string"}},
+    "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "initial_confirmation": {"type": "object", "required": ["status", "confirmed_at"], "properties": {"status": {"const": "confirmed"}, "confirmed_at": {"type": "string"}}}
+  },
+  "additionalProperties": true
+}

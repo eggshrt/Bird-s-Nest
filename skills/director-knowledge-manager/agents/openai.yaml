@@ -1,0 +1,6 @@
+interface:
+  display_name: "导演知识管理"
+  short_description: "索引、转换、审定并发布可追踪的导演岗位知识包"
+  default_prompt: "使用 $director-knowledge-manager 索引导演资料并生成待审定清单；未经我确认不要发布。"
+policy:
+  allow_implicit_invocation: false

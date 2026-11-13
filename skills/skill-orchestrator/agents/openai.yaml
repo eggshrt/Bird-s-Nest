@@ -1,0 +1,6 @@
+interface:
+  display_name: "Skill Orchestrator"
+  short_description: "Tiered controller: quick advice, role council, or a sealed multi-Agent run"
+  default_prompt: "Use $skill-orchestrator to pick the right tier for my request: unsealed single-role advice, a scoped multi-role council, or a formal recoverable V2 run."
+policy:
+  allow_implicit_invocation: false

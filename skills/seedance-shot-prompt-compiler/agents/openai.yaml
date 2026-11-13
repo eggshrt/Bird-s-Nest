@@ -1,0 +1,7 @@
+interface:
+  display_name: "Seedance 镜头提示词编译器"
+  short_description: "把封存导演镜头编译为中文 Seedance 视频提示词"
+  default_prompt: "Use $seedance-shot-prompt-compiler to compile selected sealed shots into a Chinese Seedance 2.0 T2V review spreadsheet."
+policy:
+  allow_implicit_invocation: false
+

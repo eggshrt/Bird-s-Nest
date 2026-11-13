@@ -1,0 +1,142 @@
+{
+  "schema_version": "CapabilityRegistryV1",
+  "generated_at": "2026-11-13",
+  "note": "Bundled registry: only Skills shipped with this plugin. Declare your own plugins and personal Skills in $CODEX_HOME/skill-orchestrator/capability-registry.json or <project>/.codex/skill-orchestrator/capability-registry.json using the same schema; later files win per Skill. A registry can widen permissions and raise risk, never lower either. Entries pinned with plugin_version or content_hash stop applying when the Skill changes.",
+  "type_vocabulary": {
+    "image_prompt_text": "图片生成提示词文字",
+    "video_prompt_text": "视频生成提示词文字"
+  },
+  "domains": {
+    "screenplay_intake": {
+      "title_zh": "剧本入口",
+      "entry_skills": [
+        "ai-script-breakdown"
+      ]
+    },
+    "asset_design": {
+      "title_zh": "资产设计",
+      "entry_skills": [
+        "screenplay-concept-director"
+      ]
+    },
+    "directing": {
+      "title_zh": "导演",
+      "entry_skills": [
+        "screenplay-scene-daoyanzu"
+      ]
+    },
+    "prompt_compile": {
+      "title_zh": "提示词编译",
+      "entry_skills": [
+        "dlss5-lighting-director",
+        "image-prompt-team",
+        "screenplay-shot-prose-compiler",
+        "seedance-shot-prompt-compiler"
+      ]
+    },
+    "delivery": {
+      "title_zh": "执行交付",
+      "entry_skills": []
+    },
+    "meta": {
+      "title_zh": "插件建设",
+      "entry_skills": []
+    },
+    "utility": {
+      "title_zh": "通用工具",
+      "entry_skills": []
+    }
+  },
+  "skills": {
+    "ai-script-breakdown": {
+      "plugin": "skill-orchestrator",
+      "domain": "screenplay_intake",
+      "summary_zh": "剧本拆解：产出可追溯的 screenplay_breakdown_v1",
+      "inputs": [],
+      "outputs": [],
+      "entry_only": false,
+      "canonical_entry": "ai-script-breakdown",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    },
+    "dlss5-lighting-director": {
+      "plugin": "skill-orchestrator",
+      "domain": "prompt_compile",
+      "summary_zh": "既有图片/视频提示词的光照与材质增强",
+      "inputs": [
+        "image_prompt_text",
+        "video_prompt_text"
+      ],
+      "outputs": [
+        "image_prompt_text",
+        "video_prompt_text"
+      ],
+      "entry_only": false,
+      "canonical_entry": "dlss5-lighting-director",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    },
+    "image-prompt-team": {
+      "plugin": "skill-orchestrator",
+      "domain": "prompt_compile",
+      "summary_zh": "图片提示词团队：只接受已封存的单资产需求",
+      "inputs": [],
+      "outputs": [],
+      "entry_only": false,
+      "canonical_entry": "image-prompt-team",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    },
+    "screenplay-concept-director": {
+      "plugin": "skill-orchestrator",
+      "domain": "asset_design",
+      "summary_zh": "单资产概念导演：封存 visual_asset_requirement_v1",
+      "inputs": [],
+      "outputs": [],
+      "entry_only": false,
+      "canonical_entry": "screenplay-concept-director",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    },
+    "screenplay-scene-daoyanzu": {
+      "plugin": "skill-orchestrator",
+      "domain": "directing",
+      "summary_zh": "场景导演组入口：表演调度、摄影分镜、连续性与执行包",
+      "inputs": [],
+      "outputs": [],
+      "entry_only": false,
+      "canonical_entry": "screenplay-scene-daoyanzu",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    },
+    "screenplay-shot-prose-compiler": {
+      "plugin": "skill-orchestrator",
+      "domain": "prompt_compile",
+      "summary_zh": "把已封存导演包编译为一镜一段分镜正文",
+      "inputs": [],
+      "outputs": [],
+      "entry_only": false,
+      "canonical_entry": "screenplay-shot-prose-compiler",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    },
+    "seedance-shot-prompt-compiler": {
+      "plugin": "skill-orchestrator",
+      "domain": "prompt_compile",
+      "summary_zh": "把已封存导演包编译为 Seedance 视频提示词",
+      "inputs": [],
+      "outputs": [],
+      "entry_only": false,
+      "canonical_entry": "seedance-shot-prompt-compiler",
+      "permissions": [],
+      "side_effects": [],
+      "risk_level": "low"
+    }
+  }
+}

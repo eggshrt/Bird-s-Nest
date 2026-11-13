@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ImagePromptPackageV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "version", "status", "asset_id", "asset_type", "asset_name", "requirement_hash", "visual_prompt_spec_hash", "generation_prompt", "adapter_profile", "trace", "confirmation"],
+  "properties": {
+    "schema_version": {"const": "ImagePromptPackageV2"},
+    "version": {"const": "v2"},
+    "status": {"enum": ["proposed", "degraded", "approved"]},
+    "asset_id": {"type": "string", "minLength": 1},
+    "asset_type": {"enum": ["character_master", "location_master", "scene_state", "hero_prop"]},
+    "asset_name": {"type": "string", "minLength": 1},
+    "requirement_hash": {"type": "string", "minLength": 1},
+    "visual_prompt_spec_hash": {"type": "string", "minLength": 1},
+    "generation_prompt": {"type": "string", "minLength": 80},
+    "adapter_profile": {"type": "object"},
+    "trace": {"type": "object"},
+    "confirmation": {"type": ["object", "null"]}
+  }
+}

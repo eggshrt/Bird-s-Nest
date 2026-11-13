@@ -1,0 +1,4 @@
+interface:
+  display_name: "台词导演"
+  short_description: "审查称谓、重复信息、潜台词、节奏与口型压力"
+policy: {allow_implicit_invocation: false}

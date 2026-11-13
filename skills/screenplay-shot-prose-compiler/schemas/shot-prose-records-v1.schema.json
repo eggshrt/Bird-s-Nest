@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ShotProseRecordCollectionV1",
+  "title": "Shot prose record collection v1",
+  "type": "object",
+  "required": ["schema_version", "source_package_sha256", "standard_version", "calibration", "scenes"],
+  "properties": {
+    "schema_version": {"const": "ShotProseRecordCollectionV1"},
+    "source_package_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "standard_version": {"const": "shot-prose-standard-v1"},
+    "calibration": {
+      "type": "object",
+      "required": ["mode", "status", "sample_record_ids", "confirmed_at"],
+      "properties": {
+        "mode": {"enum": ["three_sample", "inherited"]},
+        "status": {"const": "confirmed"},
+        "sample_record_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "confirmed_at": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/scene"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "baseline": {
+      "type": "object",
+      "required": ["director_intent", "space_axis", "weather_light", "ambient_sound", "initial_state"],
+      "properties": {
+        "director_intent": {"type": "string", "minLength": 1},
+        "space_axis": {"type": "string", "minLength": 1},
+        "weather_light": {"type": "string", "minLength": 1},
+        "ambient_sound": {"type": "string", "minLength": 1},
+        "initial_state": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "camera_contract": {
+      "type": "object",
+      "required": ["framing", "shooting_relation"],
+      "properties": {
+        "framing": {"type": "string", "minLength": 1},
+        "shooting_relation": {"type": "string", "minLength": 1},
+        "angle": {"type": "string"},
+        "position": {"type": "string"},
+        "lens": {"type": "string"},
+        "movement": {"type": "string"},
+        "axis": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "performance": {
+      "type": "object",
+      "required": ["emotion_label", "externalization"],
+      "properties": {
+        "emotion_label": {"type": "string"},
+        "externalization": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "record": {
+      "type": "object",
+      "required": ["record_id", "shot_group_id", "display_id", "beat_ids", "evidence_refs", "camera_contract", "visual_action", "performance", "dialogue", "sound_events", "end_state", "prose"],
+      "properties": {
+        "record_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*S[0-9]{3}C[0-9]{3}(?:-[1-9][0-9]*)?$"},
+        "shot_group_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*S[0-9]{3}C[0-9]{3}$"},
+        "display_id": {"type": "string", "pattern": "^C[0-9]{3}(?:-[1-9][0-9]*)?$"},
+        "beat_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "camera_contract": {"$ref": "#/$defs/camera_contract"},
+        "visual_action": {"type": "string", "minLength": 1},
+        "performance": {"$ref": "#/$defs/performance"},
+        "dialogue": {"type": "string"},
+        "sound_events": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "end_state": {"type": "string", "minLength": 1},
+        "prose": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "scene": {
+      "type": "object",
+      "required": ["scene_id", "production_scene_code", "title", "baseline", "records"],
+      "properties": {
+        "scene_id": {"type": "string", "minLength": 1},
+        "production_scene_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9]*S[0-9]{3}$"},
+        "title": {"type": "string"},
+        "baseline": {"$ref": "#/$defs/baseline"},
+        "records": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/record"}}
+      },
+      "additionalProperties": false
+    }
+  }
+}

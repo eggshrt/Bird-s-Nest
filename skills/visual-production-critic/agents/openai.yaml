@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visual Production Critic"
+  short_description: "Reviews readability, composition, and feasibility"
+  default_prompt: "Use $visual-production-critic only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

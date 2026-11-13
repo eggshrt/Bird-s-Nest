@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<FinalDraft DocumentType="Script" Template="No" Version="1">
+  <Content>
+    <Paragraph Type="Scene Heading"><Text>INT. 实验室 - NIGHT</Text></Paragraph>
+    <Paragraph Type="Action"><Text>玻璃舱内的灯光逐级亮起。</Text></Paragraph>
+    <Paragraph Type="Character"><Text>顾闻</Text></Paragraph>
+    <Paragraph Type="Dialogue"><Text>开始记录。</Text></Paragraph>
+    <Paragraph Type="Scene Heading"><Text>EXT. 海堤 - DAWN</Text></Paragraph>
+    <Paragraph Type="Action"><Text>无人机从浪尖上掠过。</Text></Paragraph>
+  </Content>
+</FinalDraft>

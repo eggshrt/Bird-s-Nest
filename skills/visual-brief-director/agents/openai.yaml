@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visual Brief Director"
+  short_description: "Locks the deliverable and visible intent"
+  default_prompt: "Use $visual-brief-director only with a dispatcher-signed AgentTaskV1 packet."
+policy:
+  allow_implicit_invocation: false

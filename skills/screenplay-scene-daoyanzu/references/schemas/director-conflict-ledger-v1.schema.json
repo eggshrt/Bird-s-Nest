@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "DirectorConflictLedgerV1", "type": "object",
+  "required": ["schema_version", "conflicts", "page_size", "final_confirmation"],
+  "properties": {"schema_version": {"const": "DirectorConflictLedgerV1"}, "conflicts": {"type": "array", "items": {"$ref": "director-conflict-v1.schema.json"}}, "page_size": {"const": 3}, "final_confirmation": {"type": "object", "required": ["status"], "properties": {"status": {"enum": ["pending", "confirmed"]}, "confirmed_at": {"type": ["string", "null"]}}}},
+  "additionalProperties": true
+}

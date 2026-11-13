@@ -1,0 +1,4 @@
+interface:
+  display_name: "表演调度导演"
+  short_description: "设计表演行动、潜台词、走位、视线与距离"
+policy: {allow_implicit_invocation: false}

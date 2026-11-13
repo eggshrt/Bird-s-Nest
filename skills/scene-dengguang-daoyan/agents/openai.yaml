@@ -1,0 +1,4 @@
+interface:
+  display_name: "灯光导演"
+  short_description: "规划叙事光源、可读性和曝光连续性"
+policy: {allow_implicit_invocation: false}
