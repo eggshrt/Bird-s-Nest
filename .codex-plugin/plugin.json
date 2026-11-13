@@ -1,6 +1,6 @@
 {
   "name": "skill-orchestrator",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Tiered orchestration for screenplay production Skills: quick single-role advice, scoped role councils, and sealed, recoverable multi-Agent runs. Includes screenplay breakdown, scene direction, prompt compilation, and a capability registry for other installed plugins.",
   "author": {
     "name": "eggshrt"

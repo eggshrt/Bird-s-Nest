@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.1 (2026-11-13)
+
+- `chinese-intent-clarifier` 1.1.0: 自动触发与前置筛选：判断是否影视需求
+
 ## 0.10.0 (2026-11-13)
 
 - `skill-orchestrator` 1.1.0: 三档入口、登记表合并、domains 查询、interfaces 更新、native_bridge 说明

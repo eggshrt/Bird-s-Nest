@@ -1,6 +1,6 @@
 {
   "schema_version": "ModuleLockV1",
-  "plugin_version": "0.10.0",
+  "plugin_version": "0.10.1",
   "modules": {
     "adversarial-reviewer": {
       "version": "1.0.0",
@@ -23,9 +23,9 @@
       "files": 2
     },
     "chinese-intent-clarifier": {
-      "version": "1.0.0",
-      "tree_sha256": "9a4d273341fa353f3843ad2e991337af076b6749b1bb93013b9df7e72369391a",
-      "files": 2
+      "version": "1.1.0",
+      "tree_sha256": "44be8d95c540824d3ae6c5c55f2c5fea312c083f06dea5b26c5894c719bbffc3",
+      "files": 3
     },
     "color-light-director": {
       "version": "1.0.0",
