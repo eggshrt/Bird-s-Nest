@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VideoPromptIRV1",
+  "description": "视频提示词中间表示（IR）标准 V1 - 平台无关的统一视频描述格式",
+  "type": "object",
+  "required": ["metadata", "global_constraints", "主要主体", "场景环境", "摄影参数", "分段脚本"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "IR 元数据和溯源信息",
+      "required": ["ir_version", "source"],
+      "properties": {
+        "ir_version": {
+          "const": "1.0",
+          "description": "IR schema 版本号"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源标识：封存导演包路径、脚本名称或自然语言输入摘要"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "生成时间（ISO 8601）"
+        },
+        "scene_id": {
+          "type": "string",
+          "description": "场景或镜头编号"
+        }
+      }
+    },
+    "global_constraints": {
+      "type": "object",
+      "description": "全局约束和技术参数",
+      "required": ["总时长", "比例", "目标平台"],
+      "properties": {
+        "总时长": {
+          "type": "number",
+          "description": "视频总时长（秒），必须与分段脚本时长总和严格一致",
+          "minimum": 0.1,
+          "maximum": 120
+        },
+        "比例": {
+          "enum": ["16:9", "9:16", "1:1", "21:9", "4:3"],
+          "description": "画面宽高比"
+        },
+        "目标平台": {
+          "type": "array",
+          "description": "目标生成平台列表（按优先级排序）",
+          "minItems": 1,
+          "items": {
+            "enum": ["Seedance", "MiniMax-H3", "Kling", "Runway", "Pika", "Gen-3"]
+          }
+        },
+        "帧率": {
+          "enum": [24, 25, 30, 60],
+          "description": "目标帧率（fps）"
+        }
+      }
+    },
+    "主要主体": {
+      "type": "object",
+      "description": "画面主体角色或物体的固定特征",
+      "required": ["类型", "外观描述"],
+      "properties": {
+        "类型": {
+          "enum": ["人物", "载具", "建筑", "物体", "生物", "抽象元素"],
+          "description": "主体类型分类"
+        },
+        "外观描述": {
+          "type": "string",
+          "description": "主体的固定外观特征（用于保持连续性）"
+        },
+        "初始位置": {
+          "type": "string",
+          "description": "开场时主体在画面中的位置"
+        },
+        "固定锚点": {
+          "type": "array",
+          "description": "用于保持连续性的视觉锚点（特征、服装、纹理等）",
+          "items": {"type": "string"},
+          "minItems": 1
+        }
+      }
+    },
+    "场景环境": {
+      "type": "object",
+      "description": "场景空间、环境和氛围",
+      "required": ["空间描述", "光照条件"],
+      "properties": {
+        "空间描述": {
+          "type": "string",
+          "description": "场景的空间特征、尺度和构成"
+        },
+        "光照条件": {
+          "type": "string",
+          "description": "主光源、光质、色温和光影关系"
+        },
+        "时间": {
+          "enum": ["黎明", "白天", "黄昏", "夜晚", "深夜", "不确定"],
+          "description": "场景时间"
+        },
+        "天气": {
+          "type": "string",
+          "description": "天气状况和大气效果"
+        },
+        "环境动态": {
+          "type": "array",
+          "description": "环境中的动态元素（风、水流、粒子等）",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "情绪目标": {
+      "type": "string",
+      "description": "整体情绪和氛围目标（叙事意图）"
+    },
+    "摄影参数": {
+      "type": "object",
+      "description": "摄影机参数和运动",
+      "required": ["镜头类型", "机位运动"],
+      "properties": {
+        "镜头类型": {
+          "enum": ["特写", "近景", "中景", "全景", "远景", "大远景", "过肩", "主观视角"],
+          "description": "景别分类"
+        },
+        "焦距": {
+          "type": "string",
+          "description": "镜头焦距（如 24mm、50mm、85mm 或描述性词汇）"
+        },
+        "机位运动": {
+          "type": "string",
+          "description": "摄影机运动轨迹和速度（推拉摇移跟升降）"
+        },
+        "景深": {
+          "enum": ["浅景深", "深景深", "中等景深"],
+          "description": "景深特征"
+        },
+        "运动速度": {
+          "enum": ["极慢", "慢速", "中速", "快速", "极快"],
+          "description": "摄影机运动速度"
+        }
+      }
+    },
+    "分段脚本": {
+      "type": "array",
+      "description": "时间轴分段描述（所有时间段连续且总和必须等于总时长）",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["时间段", "主要事件"],
+        "properties": {
+          "时间段": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]+)?-[0-9]+(\\.[0-9]+)?秒$",
+            "description": "时间段范围（格式：0-5秒）"
+          },
+          "主要事件": {
+            "type": "string",
+            "description": "该时间段内的主要动作或事件"
+          },
+          "摄影机动作": {
+            "type": "string",
+            "description": "该时间段的具体摄影机运动"
+          },
+          "主体动作": {
+            "type": "string",
+            "description": "主体的具体动作和表情变化"
+          },
+          "重点元素": {
+            "type": "array",
+            "description": "该段需要强调的视觉元素",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    },
+    "连续性控制": {
+      "type": "object",
+      "description": "连续性和一致性约束",
+      "properties": {
+        "固定锚点": {
+          "type": "array",
+          "description": "全程保持不变的视觉锚点列表（一镜到底需要≥2个）",
+          "items": {"type": "string"},
+          "minItems": 2
+        },
+        "轴线": {
+          "type": "string",
+          "description": "场景轴线定义（用于多镜头衔接）"
+        },
+        "前镜衔接": {
+          "type": "string",
+          "description": "与前一镜头的衔接要求"
+        },
+        "后镜衔接": {
+          "type": "string",
+          "description": "与后一镜头的衔接要求"
+        }
+      }
+    }
+  }
+}

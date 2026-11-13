@@ -1,6 +1,6 @@
 {
   "schema_version": "ModuleLockV1",
-  "plugin_version": "0.10.1",
+  "plugin_version": "0.11.0",
   "modules": {
     "adversarial-reviewer": {
       "version": "1.0.0",
@@ -23,8 +23,8 @@
       "files": 2
     },
     "chinese-intent-clarifier": {
-      "version": "1.1.0",
-      "tree_sha256": "44be8d95c540824d3ae6c5c55f2c5fea312c083f06dea5b26c5894c719bbffc3",
+      "version": "1.2.0",
+      "tree_sha256": "31d8c999d7f09c2aa9d18edc3fcb7e4c476c7b7eb116d23b7f4671b02a97d89f",
       "files": 3
     },
     "color-light-director": {
@@ -173,14 +173,19 @@
       "files": 6
     },
     "skill-orchestrator": {
-      "version": "1.1.0",
-      "tree_sha256": "e390fce652535a564af6a9c8954f7d71df8da664dae0757016288e06456af266",
+      "version": "1.2.0",
+      "tree_sha256": "ff62996dfc051ad67a7aa32cd0e5f2b747cd42050b656a8e597238235e1bafc5",
       "files": 21
     },
     "synthesis-adjudicator": {
       "version": "1.0.0",
       "tree_sha256": "f8c137f1826240c3171caa63abe36728ec6a3973b4aba7f8dc353f964a13a14a",
       "files": 2
+    },
+    "video-prompt-ir-compiler": {
+      "version": "1.0.0",
+      "tree_sha256": "0eb84d2eac299b274c15d5c98a550a9684eff529e893ef58903189ba6e61878f",
+      "files": 4
     },
     "visual-brief-director": {
       "version": "1.0.0",

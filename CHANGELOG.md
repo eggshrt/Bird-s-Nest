@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.0 (2026-11-13)
+
+- `skill-orchestrator` 1.2.0: 知识库强制加载五层防护；post_install 符号链接脚本
+- `chinese-intent-clarifier` 1.2.0: 知识库强制加载五层防护；post_install 符号链接脚本
+
 ## 0.10.1 (2026-11-13)
 
 - `chinese-intent-clarifier` 1.1.0: 自动触发与前置筛选：判断是否影视需求

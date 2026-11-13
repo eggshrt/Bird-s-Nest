@@ -59,6 +59,11 @@ Danger mode is a host prerequisite, not business authorization. Never modify Cod
 
 Maintain one canonical collaboration context with `shared_known`, `user_context_gaps`, `agent_added_context`, and `joint_unknown_hypotheses`. Every entry records provenance, confidence, impact, status, and verification. Agents receive task-bounded projections and return discoveries as `AgentResultV1`; they do not interview the user. Deduplicate blocking questions and ask at most three per round, with no round limit.
 
+**Knowledge base mandatory loading rule**:
+- When the requirement is identified as asset design (character styling, scene, prop), **must** include the corresponding asset plugin's `knowledge/` directory content in context projection
+- Agent receives task.json **must** explicitly mark "this task requires knowledge base"
+- Output **must** include knowledge base citation tracking
+
 ## Retrieval
 
 Run the hash-locked bootstrap only with Codex-bundled Python 3.12+. Preserve scan precedence:

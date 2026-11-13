@@ -45,6 +45,9 @@ metadata:
 1. **单镜优化** (`single_shot_refine`) - 修改单个镜头的某方面（构图/光影/台词/表演/时长）
 2. **多镜衔接** (`multi_shot_continuity`) - 检查或修复镜头间连续性/节奏/空间关系
 3. **资产设计** (`asset_design`) - 角色定妆、场景、道具、氛围板
+   - **槽位补充**：
+     - `knowledge_required`: true（标记此需求需查知识库）
+     - `knowledge_scope`: "character" | "scene" | "prop"（指定哪个知识库）
 4. **提示词生成** (`prompt_generation`) - 输出到 AI 视频平台的提示词
 5. **导演会诊** (`director_council`) - 需要多岗位协作评审
 6. **剧本拆解** (`screenplay_breakdown`) - 从剧本生成分镜、镜头清单
