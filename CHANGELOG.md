@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.2 (2026-11-13)
+
+- `chinese-intent-clarifier` 1.4.1: 行数精简至206行，低于阈值
+
 ## 0.12.1 (2026-11-13)
 
 - `ai-script-breakdown` 1.1.0: Plan Mode门禁加操作指引；视频提示词时长分段模板；角色定妆通用模板；chinese-intent-clarifier精简至阈值内
