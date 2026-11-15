@@ -1,6 +1,6 @@
 {
   "name": "skill-orchestrator",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "Tiered orchestration for screenplay production Skills: quick single-role advice, scoped role councils, and sealed, recoverable multi-Agent runs. Includes screenplay breakdown, scene direction, prompt compilation, and a capability registry for other installed plugins.",
   "author": {
     "name": "eggshrt"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Skill Orchestrator",
     "shortDescription": "Tiered screenplay direction: quick advice, role councils, and sealed multi-Agent runs.",
-    "longDescription": "An evidence-first screenplay and directing pipeline for Codex. The prompt-free scene director seals structured decisions, then a dedicated prose compiler renders one shot or subshot per Chinese paragraph in a table-free DOCX. Legacy XLSX materialization and the separate explicit Seedance compiler remain available without entering the default director workflow. Local v0.8.1 adds shared lighting/material enhancement and causal prompt translation; no NVIDIA rendering integration. Local v0.8.2 makes the Skill index pick each plugin's highest cached version and skip vendored copies; only the 12 index unit tests were run. User trial build; no sample, runtime, or effect tests executed. Local v0.9.0 adds three entry tiers (Light, Standard, Formal), layered capability registries that give other plugins' Skills domains and types, a code-enforced dynamic-expert gate, and a bundled native bridge that replaces per-run hand-written bridges. Index, registry, and bridge unit tests were run; no model-driven end-to-end run was executed.",
+    "longDescription": "An evidence-first screenplay and directing pipeline for Codex. The prompt-free scene director seals structured decisions, then a dedicated prose compiler renders one shot or subshot per Chinese paragraph in a table-free DOCX. Legacy XLSX materialization and the separate explicit Seedance compiler remain available without entering the default director workflow. Local v0.8.1 adds shared lighting/material enhancement and causal prompt translation; no NVIDIA rendering integration. Local v0.8.2 makes the Skill index pick each plugin's highest cached version and skip vendored copies; only the 12 index unit tests were run. User trial build; no sample, runtime, or effect tests executed. Local v0.9.0 adds three entry tiers (Light, Standard, Formal), layered capability registries that give other plugins' Skills domains and types, a code-enforced dynamic-expert gate, and a bundled native bridge that replaces per-run hand-written bridges. Index, registry, and bridge unit tests were run; no model-driven end-to-end run was executed. v0.12.3 synchronizes the actual locally installed director and controller instructions, with updated module locks; no additional functional or image/video tests in this synchronization release.",
     "developerName": "eggshrt",
     "category": "Productivity",
     "capabilities": [

@@ -1,6 +1,6 @@
 {
   "schema_version": "ModuleLockV1",
-  "plugin_version": "0.12.2",
+  "plugin_version": "0.12.3",
   "modules": {
     "adversarial-reviewer": {
       "version": "1.0.0",
@@ -108,13 +108,13 @@
       "files": 3
     },
     "scene-dengguang-daoyan": {
-      "version": "1.0.0",
-      "tree_sha256": "1a08356463935d2995afc8a397bc425e249c30f1c36231f0e19dd852028d617b",
+      "version": "1.0.1",
+      "tree_sha256": "f01b3e9541c69a65703c9c132b354946f3716ab4aa7901290a57dcba84d71419",
       "files": 3
     },
     "scene-dongzuo-daoyan": {
-      "version": "1.0.0",
-      "tree_sha256": "9ceba1a76b4cb001d821a113451a88ddb8f2ec7c9ceac0efc73d4b13472c9f6a",
+      "version": "1.0.1",
+      "tree_sha256": "fefe0b45185326e85651a5e8aab12978e2b3f78a1ac0cc3a3656361df9bdde8f",
       "files": 3
     },
     "scene-lianxuxing-zhixing-daoyan": {
@@ -128,8 +128,8 @@
       "files": 3
     },
     "scene-sheying-fenjing-daoyan": {
-      "version": "1.0.0",
-      "tree_sha256": "89b32c5aacef7d7b4f6515c38ffe1b38215d940dbd58f0531b1ef325ccac7686",
+      "version": "1.0.1",
+      "tree_sha256": "be32d2a9f3819f43074e4f8da8bb63caacbac5cea2278185c8863a35eb5390e7",
       "files": 3
     },
     "scene-taici-daoyan": {
@@ -138,8 +138,8 @@
       "files": 3
     },
     "scene-texiao-daoyan": {
-      "version": "1.0.0",
-      "tree_sha256": "501d4c351869384ff7e3067c9c8318ac7fc71034814429930b57367d010811ae",
+      "version": "1.0.1",
+      "tree_sha256": "657933a0357e6d1c3cbe196f9d1c94a07bb99b62f49aa047dadcbefc88aebb43",
       "files": 3
     },
     "scene-tiaose-daoyan": {
@@ -173,8 +173,8 @@
       "files": 6
     },
     "skill-orchestrator": {
-      "version": "1.3.0",
-      "tree_sha256": "88a7d70117da8865950ebccb2040ea4c14cbacd5cd21baf2c1846e44ef5b9d1b",
+      "version": "1.3.1",
+      "tree_sha256": "151cbf7195fe8159c697058b5e7638842ca6cac65ac5885787baf9e8981be2ab",
       "files": 21
     },
     "synthesis-adjudicator": {

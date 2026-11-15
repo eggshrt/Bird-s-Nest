@@ -105,6 +105,24 @@ The Codex App Server bridge starts, resumes, interrupts, and archives Agent thre
 
 When host-native collaboration Agents are the workers, drive the run with the bundled `scripts/native_bridge.py`; never hand-write or copy a bridge into a run directory. The run directory holds only `requirement.json`, `graph.json`, and `nodes/<node_id>/`. Each bridge step is a short command printing one JSON object: `init` validates the contract, graph, and authoritative-input hash; `approve` records the user's own confirming words and refuses without them; `claim` leases ready nodes and writes signed, binding-projected `task.json` files; `submit` validates the result, task ID, signature, worker identity, artifact hashes, and private-directory boundary; `expire` retries an overdue idempotent node once; `answer` resumes after blocking questions; `finalize` writes the snapshot, audit, and `run_report.json`; `accept` records the user's final acceptance. Leases use wall-clock deadlines, and a result that arrives after its deadline is recorded only through the explicit, audited `submit --accept-late`. `claim --single-agent`, or a multi-node run completed only by the controller, ends as `degraded_pending_acceptance`.
 
+## Video prompt total pipeline (Standard)
+
+When the user asks to refine, decompose, synthesize, audit, or quality-check a multi-shot video-generation prompt, use the registered `video_prompt_pipeline` domain rather than treating the request as a generic single-role consultation. This is a Standard multi-role workflow unless the user explicitly requests a sealed delivery package, in which case escalate to Formal.
+
+The controller proposes and executes this ordered, recoverable chain:
+
+1. `video-prompt-requirement-decomposer` — consume the draft prompt and alignment record; produce the shot-by-dimension allocation table.
+2. `scene-jietou-yingguo-daoyan` (preflight) — read the allocation table and build the causal skeleton: per-shot start/end states, causal chains, and transition contracts. Every shot gets a causal map before any director starts.
+3. Director refinement — dispatch the applicable photography, lighting, performance, action, continuity, sound, VFX, and dialogue director Skills from the allocation table before auditing. Each selected director must provide its own shot-scoped output; an audit is not a substitute for director work. Reuse previously produced outputs only when their inputs and alignment are still current.
+4. The applicable `video_prompt_audit` roles — run the registered audit Skills against their corresponding director outputs. These roles are `entry_only` and must be controller-dispatched; do not expose them as ordinary user-facing entry Skills. A FAIL returns the affected output to its director; do not initiate delivery synthesis until the required audits pass. Diagnostics may retain failed outputs, but must remain clearly non-deliverable. An unresolved CONDITIONAL_PASS dependency also blocks advancing to delivery synthesis.
+5. `scene-jietou-yingguo-daoyan` (adjudication) — cross-shot review of real director outputs against the preflight causal contracts. Checks: every shot has start/end state, every cut has causal trigger, sound bridge exists, screen direction continuous, environment changes route. If FAIL: issue targeted repair orders to specific directors (not a full re-run). Only PASS allows synthesis.
+6. `video-prompt-synthesis-director` — consume director outputs and audit reports; preserve conflicts, apply only registered fusion rules, and emit the eight-module prompt, conflict records, and sourcing trace.
+7. `video-prompt-quality-assurance` — run the fixed 44 checks (16 completeness, 10 consistency, 12 executability, 6 readability). Any critical conflict, audit FAIL, missing module, or score below threshold blocks delivery.
+
+The controller must preserve the five contracts between steps: shot IDs and time ranges, audit verdicts, conflict status, sourcing evidence, and the QA delivery gate. A Standard run is labeled `多岗位会诊草稿，未正式封存`; it must not be described as a sealed prompt package. A real multi-role conflict requires adjudication; a critical conflict remains blocking even when marked `待主控决策`. The complete simulated baseline is only a code-level verification and does not replace real岗位产出 or final human acceptance.
+
+The controller must preserve the five contracts between steps: shot IDs and time ranges, audit verdicts, conflict status, sourcing evidence, and the QA delivery gate. A Standard run is labeled `多岗位会诊草稿，未正式封存`; it must not be described as a sealed prompt package. A real multi-role conflict requires adjudication; a critical conflict remains blocking even when marked `待主控决策`. The complete simulated baseline is only a code-level verification and does not replace real岗位产出 or final human acceptance.
+
 ## Bundled verticals
 
 - `$ai-script-breakdown` produces `screenplay_breakdown_v1`.
